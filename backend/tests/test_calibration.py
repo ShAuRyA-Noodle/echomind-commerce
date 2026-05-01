@@ -132,12 +132,20 @@ def test_decaf_dark_zone_is_dont_know() -> None:
     score from the LLM contributes - and even that is suppressed by the
     formula, dropping us into `dont_know` exactly as the product principle
     requires.
+
+    Math:
+        0.4 * 0.30 + 0.3 * 0.0 + 0.3 * 0.05 = 0.135 (< 0.15 floor) -> dont_know
     """
     score = adjusted_confidence(raw=0.30, evidence=0.0, coverage=0.05)
-    assert calibration_label(score) == "low_confidence"
-    # When all signals collapse:
+    assert calibration_label(score) == "dont_know"
+    # An even more collapsed signal still lands in dont_know.
     score_collapsed = adjusted_confidence(raw=0.15, evidence=0.0, coverage=0.05)
     assert calibration_label(score_collapsed) == "dont_know"
+
+    # Sanity: bumping raw enough to clear the 0.15 floor lifts us to
+    # low_confidence, NOT confident - the formula works as expected.
+    score_lifted = adjusted_confidence(raw=0.40, evidence=0.0, coverage=0.05)
+    assert calibration_label(score_lifted) == "low_confidence"
 
 
 def test_partial_provider_failure_downgrades_one_bucket() -> None:
@@ -145,15 +153,20 @@ def test_partial_provider_failure_downgrades_one_bucket() -> None:
 
     Per failure-mode #5.3, the calibrator detects reduced sample size and
     auto-downgrades. Here we model that as: same raw + evidence, but
-    coverage drops from 0.7 → 0.4, which moves `confident` → `uncertain`.
+    coverage drops sharply from 0.7 to 0.2 (because one of four agents
+    missed every prompt), which moves `confident` to `uncertain`.
+
+    Math:
+        full     = 0.4 * 0.75 + 0.3 * 0.7 + 0.3 * 0.7  = 0.72 -> confident
+        degraded = 0.4 * 0.75 + 0.3 * 0.7 + 0.3 * 0.2  = 0.57 -> uncertain
     """
     full = calibration_label(
         adjusted_confidence(raw=0.75, evidence=0.7, coverage=0.7)
     )
     degraded = calibration_label(
-        adjusted_confidence(raw=0.75, evidence=0.7, coverage=0.4)
+        adjusted_confidence(raw=0.75, evidence=0.7, coverage=0.2)
     )
     assert full == "confident"
-    # Degraded should drop a notch.
-    assert degraded in {"confident", "uncertain"}
-    assert (full, degraded) != (degraded, full)  # change observable
+    assert degraded == "uncertain"
+    # Strictly down a bucket - never the same label, never up.
+    assert full != degraded
