@@ -1,0 +1,715 @@
+{
+  "store": "Fulcrum Coffee Co",
+  "tagline": "Specialty single-origin coffee for the home brewing enthusiast.",
+  "products": [
+    {
+      "handle": "ethiopia-yirgacheffe",
+      "title": "Ethiopia Yirgacheffe",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "ethiopia", "washed", "light-roast", "yirgacheffe"],
+      "body_html": "<p>Yirgacheffe is the cathedral of washed Ethiopian coffees. Grown above 1,950 meters in the Gedeo Zone, the cherries we sourced this season come from a smallholder cooperative outside the town of Idido. Cup profile leans toward a fruity floral profile with vibrant acidity, jasmine notes, and a tea-like body that thins into bergamot on the finish. We roast this one Nordic-light to preserve the aromatic top notes the washed processing develops.</p><p>Brew it as pour-over (V60 or Kalita Wave) with a medium-fine grind. We do not recommend espresso for this lot. Cup it black; cream will smother the floral lift. Single-origin, single-lot, full traceability sheet included with your first bag.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "22.00", "sku": "FCC-SO-ETH-250", "inventory_quantity": 80},
+        {"title": "500g Whole Bean", "price": "40.00", "sku": "FCC-SO-ETH-500", "inventory_quantity": 45},
+        {"title": "1kg Whole Bean", "price": "76.00", "sku": "FCC-SO-ETH-1000", "inventory_quantity": 20}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Ethiopia+Yirgacheffe&font=Inter", "alt": "Ethiopia Yirgacheffe whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Ethiopia", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Light", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1950", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "kenya-aa-nyeri",
+      "title": "Kenya AA Nyeri",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "kenya", "washed", "medium-light-roast", "nyeri"],
+      "body_html": "<p>From the Nyeri highlands, this AA grade lot is the bright, blackcurrant-forward Kenyan that built Kenya's reputation. SL-28 and SL-34 cultivars, washed and dried on raised African beds at the Tegu factory. Volcanic soils above 1,700 meters give a wine-like acidity that punches through milk and cuts through any morning fog. Expect blackcurrant, tomato leaf, dark chocolate, and a syrupy body that lingers.</p><p>This roast lands medium-light, dialed to bring forward the syrup without dulling the fruit. Excellent as pour-over with paper filter; many of our customers also use it as a single-origin espresso for a wildly bright shot. Bag dates roasted-on, not best-by.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "24.00", "sku": "FCC-SO-KEN-250", "inventory_quantity": 70},
+        {"title": "500g Whole Bean", "price": "44.00", "sku": "FCC-SO-KEN-500", "inventory_quantity": 35}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Kenya+AA+Nyeri&font=Inter", "alt": "Kenya AA Nyeri whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Kenya", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Light", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1700", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "colombia-huila",
+      "title": "Colombia Huila",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "colombia", "washed", "medium-roast", "huila"],
+      "body_html": "<p>The Huila department in southwest Colombia is where the country's most balanced cups come from. This lot is a washed Caturra and Castillo blend from a single farm at 1,750m near Pitalito. The cup is the workhorse Colombia profile turned dial-up: red apple, milk chocolate, brown sugar sweetness, with a nutty almond finish.</p><p>This is the bag we hand someone who says, \"I just want a cup of coffee that tastes like coffee.\" It forgives bad water, mediocre grinders, and rushed mornings. Roasted medium so it pulls a clean shot or a forgiving drip cup. Pairs beautifully with milk for flat whites and pour-overs alike.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "20.00", "sku": "FCC-SO-COL-250", "inventory_quantity": 100},
+        {"title": "500g Whole Bean", "price": "37.00", "sku": "FCC-SO-COL-500", "inventory_quantity": 60},
+        {"title": "1kg Whole Bean", "price": "70.00", "sku": "FCC-SO-COL-1000", "inventory_quantity": 30}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Colombia+Huila&font=Inter", "alt": "Colombia Huila whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Colombia", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1750", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "guatemala-antigua",
+      "title": "Guatemala Antigua",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "guatemala", "washed", "medium-roast", "antigua"],
+      "body_html": "<p>The Antigua valley sits between three volcanoes, and the volcanic ash that blew across the slopes for centuries gives this region one of the densest, sweetest cups in Central America. Bourbon and Caturra, washed, sun-dried on patios. Our lot comes from Finca El Injerto's neighbors at 1,600m.</p><p>Cup notes: cocoa nib, toasted hazelnut, brown sugar, with a smoky body that lasts long after the swallow. The acidity is structured rather than bright, the way a good Cabernet has tannins. Outstanding as pour-over, exceptional as espresso, perfect with milk. This is a comfort-food coffee.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "21.00", "sku": "FCC-SO-GUA-250", "inventory_quantity": 75},
+        {"title": "500g Whole Bean", "price": "39.00", "sku": "FCC-SO-GUA-500", "inventory_quantity": 40}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Guatemala+Antigua&font=Inter", "alt": "Guatemala Antigua whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Guatemala", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1600", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "brazil-cerrado",
+      "title": "Brazil Cerrado",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "brazil", "natural", "medium-dark-roast", "cerrado"],
+      "body_html": "<p>The Cerrado plateau in Minas Gerais is where Brazil grows its most consistent natural-process coffees. Mundo Novo and Catuai cultivars, dried on the cherry under direct sun for 18-22 days. The result is the chocolate-and-nuts cup that defines Brazilian specialty: roasted peanut, milk chocolate, low acidity, marshmallow body.</p><p>Roasted medium-dark to deepen the cocoa and tame any green notes from the natural process. This is our espresso anchor; it crushes when pulled as a single-origin shot but also disappears beautifully into milk-based drinks. Drip brewers also love it for its forgiveness across grind sizes. The bag every household needs as a daily driver.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "18.00", "sku": "FCC-SO-BRA-250", "inventory_quantity": 120},
+        {"title": "500g Whole Bean", "price": "33.00", "sku": "FCC-SO-BRA-500", "inventory_quantity": 70},
+        {"title": "1kg Whole Bean", "price": "60.00", "sku": "FCC-SO-BRA-1000", "inventory_quantity": 40}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Brazil+Cerrado&font=Inter", "alt": "Brazil Cerrado whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Brazil", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Natural", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Dark", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1100", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "indonesia-sumatra-mandheling",
+      "title": "Indonesia Sumatra Mandheling",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "indonesia", "wet-hulled", "dark-roast", "sumatra"],
+      "body_html": "<p>Sumatra coffees are processed wet-hulled (giling basah), a method unique to Indonesia where the parchment is removed at much higher moisture content than washed coffees. The result is the unmistakable Sumatra cup: earthy, herbal, full-bodied, low-acid, with cedar and dark chocolate driving the finish. Our Mandheling lot comes from smallholder farmers in the Lintong region.</p><p>Roasted medium-dark to honor the tradition this coffee built its reputation on. This is the bag for French press drinkers, for cold mornings, for people who like their coffee with a presence. It also makes a phenomenal moka-pot brew. Heavy body forgives long extractions.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "23.00", "sku": "FCC-SO-IDN-250", "inventory_quantity": 65},
+        {"title": "500g Whole Bean", "price": "42.00", "sku": "FCC-SO-IDN-500", "inventory_quantity": 30}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Sumatra+Mandheling&font=Inter", "alt": "Indonesia Sumatra Mandheling whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Indonesia", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Wet-Hulled", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Dark", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1300", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "costa-rica-tarrazu",
+      "title": "Costa Rica Tarrazu",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "costa-rica", "honey-process", "medium-roast", "tarrazu"],
+      "body_html": "<p>Tarrazu sits at 1,800m in Costa Rica's Los Santos region, growing some of the cleanest, brightest cups in Central America. This lot is honey-processed, meaning the cherry mucilage is left on during drying for added sweetness without the wildness of a full natural. Caturra and Catuai cultivars from a women-led cooperative.</p><p>Cup is honeyed apricot up front, citrus zest in the middle, and a clean malic finish that snaps shut. Roasted medium to walk the line between brightness and sweetness. Drinks beautifully as pour-over (Kalita is our pick) and produces a fascinating, fruity espresso. The honey process gives it a body washed Costa Ricans rarely achieve.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "24.00", "sku": "FCC-SO-CRI-250", "inventory_quantity": 60},
+        {"title": "500g Whole Bean", "price": "44.00", "sku": "FCC-SO-CRI-500", "inventory_quantity": 30}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Costa+Rica+Tarrazu&font=Inter", "alt": "Costa Rica Tarrazu whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Costa Rica", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Honey", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1800", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "rwanda-nyamasheke",
+      "title": "Rwanda Nyamasheke",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "rwanda", "washed", "light-roast", "nyamasheke"],
+      "body_html": "<p>Lake Kivu's western shore in the Nyamasheke district produces some of Africa's most distinctive coffees. Bourbon cultivar at 1,800m, fully washed at the Karambi station and dried slowly on raised beds for 18 days. The cup is unlike any other African origin we carry: red grape, kiwi, black tea body, with a juicy acidity that belongs to dessert wine more than coffee.</p><p>Roasted light to preserve the cup's delicacy. Treat it like a pour-over coffee exclusively. We pull this one with a 1:17 ratio at 96°C, medium-fine grind, around 3:30 total brew time. The lot is small, the season is short, the bag is worth the patience.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "26.00", "sku": "FCC-SO-RWA-250", "inventory_quantity": 50},
+        {"title": "500g Whole Bean", "price": "48.00", "sku": "FCC-SO-RWA-500", "inventory_quantity": 22}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Rwanda+Nyamasheke&font=Inter", "alt": "Rwanda Nyamasheke whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Rwanda", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Light", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1800", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "honduras-marcala",
+      "title": "Honduras Marcala",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "honduras", "washed", "medium-roast", "marcala"],
+      "body_html": "<p>Marcala in La Paz department is Honduras's first denomination of origin. Small farms at 1,500-1,700m grow Catuai and Lempira cultivars on volcanic loam. Fully washed and dried for 12 days on patios. We work directly with the producers via an importing partner that publishes farmgate prices.</p><p>Cup is comfort-forward: caramel, walnut, soft cocoa, pear sweetness, with an acidity that whispers rather than shouts. Roasted medium for daily-driver versatility. Excellent in any drip brewer; performs admirably as espresso for those who like a sweeter, lower-acid shot. Pairs beautifully with cream and sugar without dissolving into them.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "19.00", "sku": "FCC-SO-HND-250", "inventory_quantity": 85},
+        {"title": "500g Whole Bean", "price": "35.00", "sku": "FCC-SO-HND-500", "inventory_quantity": 45}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Honduras+Marcala&font=Inter", "alt": "Honduras Marcala whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Honduras", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1600", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "peru-cajamarca",
+      "title": "Peru Cajamarca",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "peru", "washed", "medium-light-roast", "cajamarca", "organic"],
+      "body_html": "<p>Cajamarca in northern Peru produces high-grown, organic-by-default coffee from smallholders who farm at 1,800-2,100m without chemical inputs simply because they cannot afford them. The result, when sorted carefully, is one of the cleanest washed cups in South America. Typica and Bourbon cultivars, washed at small wet mills at the farm.</p><p>Cup is gentle: green apple, cane sugar, cocoa powder, with a delicate floral lift on the finish. Body is medium and tea-like. Roasted medium-light to spotlight the apple-and-sugar architecture. This is a softer, more contemplative coffee than our Colombia Huila - same family, but quieter.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "21.00", "sku": "FCC-SO-PER-250", "inventory_quantity": 70},
+        {"title": "500g Whole Bean", "price": "39.00", "sku": "FCC-SO-PER-500", "inventory_quantity": 35}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Peru+Cajamarca&font=Inter", "alt": "Peru Cajamarca whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Peru", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Light", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1900", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "mexico-chiapas-altura",
+      "title": "Mexico Chiapas Altura",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "mexico", "washed", "medium-roast", "chiapas"],
+      "body_html": "<p>Chiapas borders Guatemala and shares much of its coffee DNA, but the region develops a softer, more cocoa-leaning character of its own. This Altura grade comes from a co-op of indigenous Mam and Tzeltal farmers at 1,400-1,650m. Washed and patio-dried, traditional methods, traceable to the village.</p><p>Cup is Mexican chocolate in the best possible sense: cinnamon-edged cocoa, raw almond, brown sugar, with a soft acidity that disappears into the body. Roasted medium. Plays beautifully as drip, French press, or a forgiving morning espresso. We treat this as our hidden-gem daily - quieter than Brazil Cerrado, more interesting than most workhorse coffees in this price range.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "19.00", "sku": "FCC-SO-MEX-250", "inventory_quantity": 80},
+        {"title": "500g Whole Bean", "price": "35.00", "sku": "FCC-SO-MEX-500", "inventory_quantity": 40}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Mexico+Chiapas&font=Inter", "alt": "Mexico Chiapas Altura whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Mexico", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Washed", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "1500", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "yemen-mocha-sanani",
+      "title": "Yemen Mocha Sanani",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Single-Origin Coffee",
+      "tags": ["single-origin", "yemen", "natural", "medium-dark-roast", "mocha", "rare"],
+      "body_html": "<p>Mocha Sanani is the oldest coffee on the planet - direct lineage from the original Yemeni cultivars that gave the world coffee in the 15th century. Grown on terraced mountainsides above 2,000m near Sana'a in arid, mineral-rich soils. Sun-dried whole-cherry on the rooftops where farming families have processed coffee for six centuries.</p><p>Cup is wild and unmistakable: dried fig, raisin, dark cocoa, cardamom spice, with a syrupy body and a winey, slightly fermented character that no other origin produces. Roasted medium-dark to balance the natural-process intensity. This is a sipping coffee - brew it like you'd brew tea, and slow down. Limited bags per harvest.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "38.00", "sku": "FCC-SO-YEM-250", "inventory_quantity": 25}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/3B82F6/white?text=Yemen+Mocha+Sanani&font=Inter", "alt": "Yemen Mocha Sanani whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "origin_country", "value": "Yemen", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "process", "value": "Natural", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Dark", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "altitude_m", "value": "2100", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "morning-blend",
+      "title": "Morning Blend",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Blend",
+      "tags": ["blend", "medium-roast", "drip", "everyday"],
+      "body_html": "<p>Our morning blend is engineered for the first cup of the day: enough body to feel like coffee, enough sweetness to drink black, enough forgiveness to handle a pour-over you brewed with one eye still closed. Three components: Brazil Cerrado for body and chocolate, Colombia Huila for balance and red apple, and a small pour of Ethiopia Yirgacheffe for aromatic lift on the finish.</p><p>Roasted medium. Brew it however you like; we have customers who use it for drip, French press, AeroPress, even espresso when they want a more approachable shot. We update the component ratios slightly each season as harvests rotate, but the cup signature stays steady. The only blend that ships in our 1kg bag.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "18.00", "sku": "FCC-BL-MRN-250", "inventory_quantity": 150},
+        {"title": "500g Whole Bean", "price": "33.00", "sku": "FCC-BL-MRN-500", "inventory_quantity": 90},
+        {"title": "1kg Whole Bean", "price": "60.00", "sku": "FCC-BL-MRN-1000", "inventory_quantity": 50}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/F59E0B/white?text=Morning+Blend&font=Inter", "alt": "Morning Blend whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "blend_components", "value": "Brazil Cerrado, Colombia Huila, Ethiopia Yirgacheffe", "type": "multi_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"}
+      ]
+    },
+    {
+      "handle": "espresso-blend",
+      "title": "Espresso Blend",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Blend",
+      "tags": ["blend", "medium-dark-roast", "espresso"],
+      "body_html": "<p>Built for espresso, sweet under milk, balanced as a black shot. Brazil Cerrado anchors the body and crema, Guatemala Antigua adds cocoa and structure, and a small percentage of Sumatra Mandheling gives it the low-end weight that makes a flat white feel like dessert.</p><p>Roasted medium-dark, rested 7 days before shipping. Pulls cleanly at a 1:2 ratio in 28-32 seconds with a fresh grinder. We dial it in monthly on a La Marzocco Linea Mini at our roastery and publish the recipe on the bag. Holds up admirably as French press or moka pot for those who don't own an espresso machine - the high-extraction roast level forgives both methods.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "20.00", "sku": "FCC-BL-ESP-250", "inventory_quantity": 130},
+        {"title": "500g Whole Bean", "price": "37.00", "sku": "FCC-BL-ESP-500", "inventory_quantity": 70},
+        {"title": "1kg Whole Bean", "price": "68.00", "sku": "FCC-BL-ESP-1000", "inventory_quantity": 35}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/F59E0B/white?text=Espresso+Blend&font=Inter", "alt": "Espresso Blend whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "blend_components", "value": "Brazil Cerrado, Guatemala Antigua, Sumatra Mandheling", "type": "multi_line_text_field"},
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Dark", "type": "single_line_text_field"}
+      ]
+    },
+    {
+      "handle": "decaf-blend",
+      "title": "Decaf Blend (Swiss Water Process)",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Blend",
+      "tags": ["blend", "decaf", "swiss-water", "medium-roast"],
+      "body_html": "<p>A Swiss Water decaffeinated blend. Roasted medium.</p><p>Available in 250g and 500g bags.</p>",
+      "variants": [
+        {"title": "250g Whole Bean", "price": "21.00", "sku": "FCC-BL-DCF-250", "inventory_quantity": 60},
+        {"title": "500g Whole Bean", "price": "39.00", "sku": "FCC-BL-DCF-500", "inventory_quantity": 30}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/F59E0B/white?text=Decaf+Blend&font=Inter", "alt": "Decaf Blend whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium", "type": "single_line_text_field"}
+      ]
+    },
+    {
+      "handle": "cold-brew-specific-blend",
+      "title": "Cold Brew Specific Blend",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Blend",
+      "tags": ["blend", "cold-brew", "medium-dark-roast"],
+      "body_html": "<p>Built specifically for cold brew. Coarse-ground extraction over 12-18 hours pulls flavor differently than hot water - sweetness is amplified, acidity drops, and bitterness needs careful management. We engineered this blend to maximize the chocolate and caramel notes that thrive in cold extraction while keeping the body smooth and the finish clean.</p><p>Roasted medium-dark and rested 5 days. Use a 1:8 coffee-to-water ratio for concentrate (dilute 1:1 with water or milk to serve), or 1:15 for ready-to-drink. Steep at room temperature for 14-16 hours, or refrigerated for 18-24 hours. Filter through a fine-mesh strainer plus paper. Will keep refrigerated for two weeks. Best in our 500g and 1kg sizes for cold brew batch makers.</p>",
+      "variants": [
+        {"title": "500g Whole Bean", "price": "34.00", "sku": "FCC-BL-CLD-500", "inventory_quantity": 80},
+        {"title": "1kg Whole Bean", "price": "62.00", "sku": "FCC-BL-CLD-1000", "inventory_quantity": 40}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/F59E0B/white?text=Cold+Brew+Blend&font=Inter", "alt": "Cold Brew Specific Blend whole bean coffee bag"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "roast_level", "value": "Medium-Dark", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "intended_brew_method", "value": "Cold Brew", "type": "single_line_text_field"}
+      ]
+    },
+    {
+      "handle": "v60-dripper",
+      "title": "Hario V60 Ceramic Dripper (02)",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Brewing Equipment",
+      "tags": ["equipment", "pour-over", "v60", "hario"],
+      "body_html": "<p>The Hario V60 is the most popular pour-over device in specialty coffee for good reason: a 60-degree cone, a single large hole at the bottom, and spiral ridges on the inner wall that promote even extraction and let the brewer control flow rate by pour technique. The size 02 brews 1-4 cups (300-600ml).</p><p>This is the ceramic version, which retains heat far better than plastic and produces a noticeably sweeter cup as a result. Pre-warm with a rinse of hot water and you'll see the difference immediately. Pairs with V60 paper filters (sold separately, white or natural). The most forgiving coffee tool you'll ever own once you find your pour rhythm.</p>",
+      "variants": [
+        {"title": "Ceramic White", "price": "32.00", "sku": "FCC-EQ-V60-CW", "inventory_quantity": 80}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/64748B/white?text=V60+Dripper&font=Inter", "alt": "Hario V60 ceramic pour-over dripper"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "brand", "value": "Hario", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "capacity_ml", "value": "600", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "chemex-8-cup",
+      "title": "Chemex 8-Cup Classic Series",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Brewing Equipment",
+      "tags": ["equipment", "pour-over", "chemex"],
+      "body_html": "<p>The Chemex was designed in 1941 by chemist Peter Schlumbohm and now lives in the Museum of Modern Art's permanent collection. The 8-cup Classic Series brews 40 ounces (about 1.2 liters) and uses Chemex's proprietary thick paper filter, which produces an exceptionally clean, almost wine-like cup by removing nearly all oils and fines.</p><p>The borosilicate glass body, wooden collar, and leather tie are unchanged from the original 1941 design. Brews best with a coarser grind than V60 and a slower pour. Pre-rinse the filter thoroughly to remove paper taste. Best for showcasing light-roasted, high-acidity coffees where clarity is the goal - our Ethiopia Yirgacheffe and Rwanda Nyamasheke shine in it.</p>",
+      "variants": [
+        {"title": "8-Cup Classic", "price": "55.00", "sku": "FCC-EQ-CHX-8", "inventory_quantity": 50}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/64748B/white?text=Chemex+8-Cup&font=Inter", "alt": "Chemex 8-cup classic pour-over brewer"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "brand", "value": "Chemex", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "capacity_ml", "value": "1200", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "aeropress-original",
+      "title": "AeroPress Original",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Brewing Equipment",
+      "tags": ["equipment", "aeropress", "immersion"],
+      "body_html": "<p>The AeroPress is the only brewer that survives equally well in your kitchen, your campsite, and your hotel room on a work trip. Press-driven immersion brewing in 60 seconds, a forgiveness range that makes most other brewers look picky, and an active community of recipes that range from classic 250ml mugs to extreme inverted-method experiments.</p><p>This is the Original (not the Go or XL). Includes the chamber, plunger, funnel, scoop, stirrer, and a starter pack of 350 paper micro-filters. Reusable metal filters are sold separately if you prefer a heavier body. Brews 1-3 cups depending on recipe. The single best coffee gift for beginners.</p>",
+      "variants": [
+        {"title": "Original", "price": "40.00", "sku": "FCC-EQ-AERO-OG", "inventory_quantity": 70}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/64748B/white?text=AeroPress&font=Inter", "alt": "AeroPress Original coffee brewer"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "brand", "value": "AeroPress", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "capacity_ml", "value": "250", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "french-press-1l",
+      "title": "Bodum Chambord French Press 1L",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Brewing Equipment",
+      "tags": ["equipment", "french-press", "immersion", "bodum"],
+      "body_html": "<p>The French press is the most underrated brewer in specialty coffee. Full immersion, a metal mesh filter that lets oils and a small amount of fines through, and a body that no paper filter can match. The Bodum Chambord is the canonical 1L design - borosilicate glass beaker, chrome frame, three-stage stainless filter.</p><p>Brews 4-5 cups (1L). Use a coarse grind, 1:15 ratio, 4 minutes immersion, then a slow press. The result is a heavier, more textural cup that works particularly well with our Sumatra Mandheling and Brazil Cerrado. Don't underextract: many home brewers stop the press too early and end up with thin, sour coffee. Trust the four minutes.</p>",
+      "variants": [
+        {"title": "1L Chrome", "price": "48.00", "sku": "FCC-EQ-FR-1L", "inventory_quantity": 55}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/64748B/white?text=French+Press+1L&font=Inter", "alt": "Bodum Chambord French Press 1L"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "brand", "value": "Bodum", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "capacity_ml", "value": "1000", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "brew-scale-with-timer",
+      "title": "Acaia Pearl Brewing Scale with Timer",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Brewing Equipment",
+      "tags": ["equipment", "scale", "timer", "acaia"],
+      "body_html": "<p>The single piece of equipment that will improve your coffee more than any other purchase. The Acaia Pearl combines a precision scale (0.1g resolution, 2kg capacity) with a built-in timer and brewing modes optimized for pour-over, espresso, and dual-display workflows.</p><p>Pair it with the Acaia mobile app for full recipe logging, flow-rate visualization, and shot tracking. The flat top accommodates V60s, Chemexes, drippers, and standard espresso scales. USB-C charging, ~15 hour battery, and a build that survives a daily-driver life on a wet bar. The reason your coffee is inconsistent is almost always that you don't weigh it. This fixes that.</p>",
+      "variants": [
+        {"title": "Black", "price": "165.00", "sku": "FCC-EQ-ACAIA-BLK", "inventory_quantity": 30}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/64748B/white?text=Brew+Scale&font=Inter", "alt": "Acaia Pearl brewing scale with timer"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "brand", "value": "Acaia", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "max_capacity_g", "value": "2000", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "gooseneck-kettle-1l",
+      "title": "Fellow Stagg EKG Gooseneck Kettle 1L",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Brewing Equipment",
+      "tags": ["equipment", "kettle", "gooseneck", "fellow", "electric"],
+      "body_html": "<p>The Fellow Stagg EKG is the gooseneck kettle that pour-over enthusiasts almost universally end up buying. 1L capacity, variable temperature in 1°F increments from 135-212°F, a 60-minute hold function, and the pour spout that gave Fellow its reputation: the most controllable flow rate in the category.</p><p>Built for V60, Chemex, and Kalita brews where pour control matters. The flat top sits flush so you can use a brewing scale underneath. We use one at the roastery for QC cuppings and we recommend it as the second piece of brewing kit anyone serious about pour-over should own (after a scale). Available in matte black or polished steel.</p>",
+      "variants": [
+        {"title": "Matte Black", "price": "175.00", "sku": "FCC-EQ-KTL-MB", "inventory_quantity": 25},
+        {"title": "Polished Steel", "price": "175.00", "sku": "FCC-EQ-KTL-PS", "inventory_quantity": 20}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/64748B/white?text=Gooseneck+Kettle&font=Inter", "alt": "Fellow Stagg EKG gooseneck kettle"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "brand", "value": "Fellow", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "capacity_ml", "value": "1000", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "subscription-weekly-250g-single-origin",
+      "title": "Weekly Single-Origin Subscription - 250g",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Subscription",
+      "tags": ["subscription", "weekly", "single-origin", "250g"],
+      "body_html": "<p>A 250g bag of single-origin coffee shipped to you every week. We rotate origin each shipment based on what's freshest in our roastery - you'll never get the same coffee two weeks in a row, and you'll taste your way through a dozen origins per quarter. Includes brewing notes specific to each lot and a tasting log card you can fill in.</p><p>Great fit for: pour-over households, two-person homes that finish 250g in a week, and anyone trying to expand their palate. Skip a week or pause anytime from your account dashboard. First shipment goes out Monday after signup. Cancel anytime.</p>",
+      "variants": [
+        {"title": "Whole Bean - Weekly 250g", "price": "22.00", "sku": "FCC-SUB-W250-SO", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/10B981/white?text=Weekly+250g+SO&font=Inter", "alt": "Weekly 250g single-origin subscription"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "billing_frequency", "value": "Weekly", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "size_g", "value": "250", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "subscription-weekly-500g-single-origin",
+      "title": "Weekly Single-Origin Subscription - 500g",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Subscription",
+      "tags": ["subscription", "weekly", "single-origin", "500g"],
+      "body_html": "<p>The same rotating single-origin program as our 250g weekly, scaled up for households that drink more coffee. 500g bag every week, rotating origin, full traceability sheet included with each shipment.</p><p>Great fit for: 3-4 person homes, people who brew twice daily, and anyone running both a pour-over and a French press through their week. We ship Monday for delivery by Wednesday-Friday in most US zip codes. Skip, pause, or cancel anytime. Subscribers also get 10% off any add-on equipment in the same order.</p>",
+      "variants": [
+        {"title": "Whole Bean - Weekly 500g", "price": "40.00", "sku": "FCC-SUB-W500-SO", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/10B981/white?text=Weekly+500g+SO&font=Inter", "alt": "Weekly 500g single-origin subscription"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "billing_frequency", "value": "Weekly", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "size_g", "value": "500", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "subscription-monthly-250g",
+      "title": "Monthly Single-Origin Subscription - 250g",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Subscription",
+      "tags": ["subscription", "monthly", "single-origin", "250g"],
+      "body_html": "<p>One 250g bag of single-origin coffee per month, rotating origin based on freshest stock. Designed for one-person households, occasional drinkers, or anyone supplementing a daily blend with a special-occasion bag.</p><p>Each month you'll receive a different origin with brewing notes tailored to that lot's characteristics. Skip months you don't need; reactivate when you do. The most flexible entry point into a Fulcrum subscription, and a popular gift since the recipient gets surprise origins each month without committing them to weekly volume.</p>",
+      "variants": [
+        {"title": "Whole Bean - Monthly 250g", "price": "22.00", "sku": "FCC-SUB-M250", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/10B981/white?text=Monthly+250g&font=Inter", "alt": "Monthly 250g single-origin subscription"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "billing_frequency", "value": "Monthly", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "size_g", "value": "250", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "subscription-monthly-500g",
+      "title": "Monthly Single-Origin Subscription - 500g",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Subscription",
+      "tags": ["subscription", "monthly", "single-origin", "500g"],
+      "body_html": "<p>One 500g bag of single-origin coffee per month. The middle gear of our subscription line: enough volume for a couple, low enough cadence that the coffee never overwhelms your kitchen. Rotating origin, full traceability, brewing notes tuned to that lot.</p><p>Subscribers get 10% off all equipment add-ons in the same order, free shipping on subscription bags, and the option to swap to any in-stock origin instead of the rotating pick if you have a clear favorite. Skip, pause, or cancel from your account at any time.</p>",
+      "variants": [
+        {"title": "Whole Bean - Monthly 500g", "price": "40.00", "sku": "FCC-SUB-M500", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/10B981/white?text=Monthly+500g&font=Inter", "alt": "Monthly 500g single-origin subscription"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "billing_frequency", "value": "Monthly", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "size_g", "value": "500", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "subscription-monthly-250g-x2",
+      "title": "Monthly Two Origins Subscription - 2 x 250g",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Subscription",
+      "tags": ["subscription", "monthly", "single-origin", "duo"],
+      "body_html": "<p>Two different 250g single-origin bags shipped together once a month. We pair them deliberately - one bright washed African with one rounded Latin American natural, for example, so you get a structural contrast in your home brewing each month.</p><p>This is the subscription our most curious customers pick. It teaches you how to taste origins side by side, which is the fastest way to grow your palate. Each shipment includes a tasting comparison card. Skip, pause, or cancel anytime. Excellent gift for partners or roommates who can't agree on one bean.</p>",
+      "variants": [
+        {"title": "Whole Bean - 2 x 250g Monthly", "price": "42.00", "sku": "FCC-SUB-M250X2", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/10B981/white?text=Monthly+Duo&font=Inter", "alt": "Monthly two origins subscription"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "billing_frequency", "value": "Monthly", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "size_g", "value": "500", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "subscription-quarterly-sampler",
+      "title": "Quarterly Sampler Subscription",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Subscription",
+      "tags": ["subscription", "quarterly", "sampler"],
+      "body_html": "<p>Once per quarter, a curated sampler box of four 100g single-origin bags chosen to showcase a deliberate theme: African washed coffees, naturals across continents, high-altitude microlots, or an espresso-forward set, depending on the season. Includes a printed booklet with origin notes, brewing recipes for each, and a cupping comparison guide.</p><p>This is our most considered subscription. The pace is slow enough that you actually drink each bag through and form an opinion. Subscribers receive 15% off any full-size bag re-order of any origin they fall for. Skip a quarter or cancel anytime. Ships first week of each new season.</p>",
+      "variants": [
+        {"title": "Quarterly Box (4 x 100g)", "price": "44.00", "sku": "FCC-SUB-QSMPL", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/10B981/white?text=Quarterly+Sampler&font=Inter", "alt": "Quarterly sampler subscription box"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "billing_frequency", "value": "Quarterly", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "size_g", "value": "400", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "sampler-box-4x100g",
+      "title": "Sampler Box - 4 x 100g",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "sampler", "100g"],
+      "body_html": "<p>A one-time gift box: four 100g bags chosen to span our flagship origin lineup. Default selection rotates monthly but always includes one washed African, one Latin American natural, one Latin American washed, and one Asian coffee - a deliberately wide map of what specialty coffee tastes like across continents.</p><p>Comes wrapped in our recycled craft-paper outer box with a printed origin and brewing booklet. Optional gift message at checkout. Single charge, no subscription, no auto-renewal. The most popular onboarding gift our customers send to friends who have just bought their first pour-over.</p>",
+      "variants": [
+        {"title": "Standard 4 x 100g", "price": "38.00", "sku": "FCC-GFT-SMPL", "inventory_quantity": 60}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Sampler+Box&font=Inter", "alt": "Sampler box four 100g bags"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "size_g", "value": "400", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "gift-card-25",
+      "title": "Gift Card - $25",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "gift-card"],
+      "body_html": "<p>A $25 Fulcrum Coffee Co gift card, delivered by email at checkout. Recipients can spend it on any product in the catalog, including subscriptions and equipment. Never expires. No fees. Redeemable at fulcrumcoffee.example.</p><p>Perfect for new home brewers, friends getting into specialty coffee, or anyone you'd rather let pick their own beans. Add a personal message at checkout. Codes are sent within 5 minutes of order confirmation.</p>",
+      "variants": [
+        {"title": "$25 Gift Card", "price": "25.00", "sku": "FCC-GFT-GC25", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Gift+Card+%2425&font=Inter", "alt": "Fulcrum gift card $25"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "denomination_usd", "value": "25", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "gift-card-50",
+      "title": "Gift Card - $50",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "gift-card"],
+      "body_html": "<p>A $50 Fulcrum Coffee Co gift card, delivered by email. The $50 denomination covers two 250g single-origin bags or one 500g plus a small accessory. Most-popular gift card tier in our store. Never expires.</p><p>Add a personal message at checkout. Codes deliver within 5 minutes of order confirmation. Redeemable at fulcrumcoffee.example against any product including subscriptions, equipment, and other gift bundles.</p>",
+      "variants": [
+        {"title": "$50 Gift Card", "price": "50.00", "sku": "FCC-GFT-GC50", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Gift+Card+%2450&font=Inter", "alt": "Fulcrum gift card $50"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "denomination_usd", "value": "50", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "gift-card-100",
+      "title": "Gift Card - $100",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "gift-card"],
+      "body_html": "<p>A $100 Fulcrum Coffee Co gift card, delivered by email at checkout. Enough for a multi-month subscription kickoff, a brewing kit plus beans, or a generous holiday gesture. Never expires, no fees.</p><p>Customers commonly pair this with a printed greeting card from us; mention the recipient's preferred brewing method in the order notes and we'll include a brewing-recipe card matched to their setup. Code delivers within 5 minutes of confirmation.</p>",
+      "variants": [
+        {"title": "$100 Gift Card", "price": "100.00", "sku": "FCC-GFT-GC100", "inventory_quantity": 999}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Gift+Card+%24100&font=Inter", "alt": "Fulcrum gift card $100"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "denomination_usd", "value": "100", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "branded-mug-12oz",
+      "title": "Fulcrum Branded Ceramic Mug 12oz",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "mug", "branded", "ceramic"],
+      "body_html": "<p>A 12oz double-walled ceramic mug printed with our minimalist Fulcrum F mark in matte cream on a slate-gray body. Hand-thrown shape, microwave-safe, dishwasher-safe, but we won't tell anyone if you wash it by hand because the print lasts longer that way.</p><p>The 12oz size is intentional: large enough for a long pour-over, small enough that the coffee stays drinkably hot end-to-end. Pairs nicely with our gift card or sampler box for a starter-set gift bundle. Single mug per order; ships double-boxed for safe transit.</p>",
+      "variants": [
+        {"title": "Slate Gray 12oz", "price": "20.00", "sku": "FCC-GFT-MUG-12", "inventory_quantity": 100}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Branded+Mug&font=Inter", "alt": "Fulcrum branded ceramic mug"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "capacity_oz", "value": "12", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "bean-and-book-hoffmann",
+      "title": "Bean + Book - How to Make the Best Coffee at Home (Hoffmann)",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "book", "hoffmann", "education"],
+      "body_html": "<p>A bundled gift: one 250g bag of our Colombia Huila (the most forgiving single-origin in the catalog) plus a hardcover copy of James Hoffmann's <em>How to Make the Best Coffee at Home</em>. Hoffmann's book is the single best primer on home brewing in print: gear, water, grind, technique, troubleshooting, all in 224 pages of clear writing.</p><p>The combo is our most-given gift to people just stepping past pre-ground supermarket coffee. The book teaches them what to do; the bag gives them something genuinely good to do it with. Comes wrapped in our craft-paper gift box with a tasting-log card.</p>",
+      "variants": [
+        {"title": "Bundle - 250g + Book", "price": "48.00", "sku": "FCC-GFT-BNB-HFM", "inventory_quantity": 40}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Bean+%2B+Book&font=Inter", "alt": "Bean and book Hoffmann gift bundle"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "book_title", "value": "How to Make the Best Coffee at Home", "type": "single_line_text_field"},
+        {"namespace": "fulcrum", "key": "book_author", "value": "James Hoffmann", "type": "single_line_text_field"}
+      ]
+    },
+    {
+      "handle": "brewing-kit-v60-starter",
+      "title": "V60 Brewing Kit - Dripper, Filters, Kettle",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "kit", "v60", "starter"],
+      "body_html": "<p>A complete pour-over starter kit: Hario V60 ceramic dripper (size 02), 100 white V60 paper filters, and a Fellow Stagg EKG gooseneck kettle in matte black. Bundled at a discount over buying the three pieces individually. Includes our printed V60 brewing recipe card with three ratios for different roast levels.</p><p>This is the kit we hand someone whose Christmas list says \"I want to start making good coffee at home.\" Add a 250g bag of any single-origin (sold separately) and they're brewing a better cup than most cafes the same morning. Ships in protective packaging; single shipment.</p>",
+      "variants": [
+        {"title": "Complete Kit", "price": "199.00", "sku": "FCC-GFT-KIT-V60", "inventory_quantity": 25}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=V60+Kit&font=Inter", "alt": "V60 starter brewing kit with kettle"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "components", "value": "V60 dripper, 100 paper filters, Stagg EKG kettle", "type": "multi_line_text_field"}
+      ]
+    },
+    {
+      "handle": "holiday-box",
+      "title": "Holiday Box - Curated Three-Bag Gift",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Gift",
+      "tags": ["gift", "holiday", "box", "limited"],
+      "body_html": "<p>Our seasonal gift box released each November: three 200g single-origin bags chosen for festive weather and giving - one chocolate-and-nuts Brazil natural, one balanced Colombia, one bright washed African for the morning of New Year's Eve. Wrapped in a foil-stamped craft-paper outer box with a holiday tasting card.</p><p>Available November 1 through December 22 each year. Includes optional gift message and dedicated holiday-shipping cutoff dates. The box that 30% of our December customers send to one or more recipients. Ships next-business-day from order confirmation through December 18; check the holiday shipping page for cutoffs after that date.</p>",
+      "variants": [
+        {"title": "Holiday 3 x 200g", "price": "55.00", "sku": "FCC-GFT-HOL", "inventory_quantity": 80}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/EC4899/white?text=Holiday+Box&font=Inter", "alt": "Holiday three bag gift box"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "size_g", "value": "600", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "limited-ethiopia-microlot",
+      "title": "LIMITED - Ethiopia Guji Microlot",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Limited Edition",
+      "tags": ["limited", "ethiopia", "microlot", "natural", "guji"],
+      "body_html": "<p>A microlot from a single washing station in the Guji highlands, sun-dried on raised beds at 2,050m. Heirloom Ethiopian cultivars, natural-process, slow-dried for 21 days. Cup explodes with strawberry jam, ripe peach, milk chocolate, and a syrupy body that no washed Ethiopian achieves. Roasted light-medium to honor the natural process intensity.</p><p>Just 18kg total of green came in, which makes this our smallest single lot of the season. Limited to 60 bags total at 250g; once sold, gone for the year. Brew as pour-over with a slightly coarser-than-V60-default grind. Will not return - limited editions are by definition single-harvest, single-lot.</p>",
+      "variants": [
+        {"title": "250g Limited", "price": "32.00", "sku": "FCC-LIM-ETH-GJ", "inventory_quantity": 18}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/8B5CF6/white?text=LIMITED+Ethiopia&font=Inter", "alt": "Limited Ethiopia Guji microlot"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "limited_edition", "value": "true", "type": "boolean"},
+        {"namespace": "fulcrum", "key": "harvest_year", "value": "2026", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "limited-kenya-microlot",
+      "title": "LIMITED - Kenya Karatina Microlot",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Limited Edition",
+      "tags": ["limited", "kenya", "microlot", "washed"],
+      "body_html": "<p>A peaberry microlot from a single washing station in Karatina, Nyeri County, at 1,820m. Peaberries are the rare 5-7% of cherries that develop a single round seed instead of two flat seeds - denser, sweeter, and (for some palates) more concentrated than a standard AA. Washed and slow-dried for 18 days.</p><p>Cup is the platonic Kenyan: blackcurrant, tomato leaf, dark chocolate, intense malic acidity. Roasted medium-light. 25 bags at 250g, harvested in March 2026, single lot. Brew as pour-over (V60 with a slightly tighter grind) or as a single-origin espresso for an absolute mind-bender of a shot. Will not return.</p>",
+      "variants": [
+        {"title": "250g Limited", "price": "34.00", "sku": "FCC-LIM-KEN-KR", "inventory_quantity": 25}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/8B5CF6/white?text=LIMITED+Kenya&font=Inter", "alt": "Limited Kenya Karatina peaberry microlot"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "limited_edition", "value": "true", "type": "boolean"},
+        {"namespace": "fulcrum", "key": "harvest_year", "value": "2026", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "limited-colombia-geisha",
+      "title": "LIMITED - Colombia Geisha Microlot",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Limited Edition",
+      "tags": ["limited", "colombia", "microlot", "geisha", "washed"],
+      "body_html": "<p>A washed Geisha microlot from Finca La Esperanza in Tolima, 1,950m. Geisha is the most aromatic cultivar in commercial production, originally from Ethiopia and famous in Panama where it has won the Best of Panama auction year after year. Colombian Geisha is rarer and often more affordable than Panamanian, while delivering the same jasmine-and-bergamot signature.</p><p>Cup is electric: jasmine, bergamot, white peach, honey, with a tea-like body and a finish that reminds you of really good Champagne. Roasted Nordic-light. Brew exclusively as pour-over (V60 or Kalita), 1:18 ratio, 95°C, 3:00 brew time. 12 bags at 200g. Once gone, gone.</p>",
+      "variants": [
+        {"title": "200g Limited", "price": "55.00", "sku": "FCC-LIM-COL-GS", "inventory_quantity": 12}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/8B5CF6/white?text=LIMITED+Geisha&font=Inter", "alt": "Limited Colombia Geisha microlot"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "limited_edition", "value": "true", "type": "boolean"},
+        {"namespace": "fulcrum", "key": "cultivar", "value": "Geisha", "type": "single_line_text_field"}
+      ]
+    },
+    {
+      "handle": "limited-panama-natural",
+      "title": "LIMITED - Panama Boquete Natural Microlot",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Limited Edition",
+      "tags": ["limited", "panama", "microlot", "natural", "boquete"],
+      "body_html": "<p>A natural-process microlot from Boquete in Panama's Chiriqui highlands, 1,650m. Boquete is the heart of Panamanian specialty coffee and the home of the Geisha movement, but this is a more accessible Caturra-Catuai lot, naturally processed for 22 days on raised beds. Roasted medium-light.</p><p>Cup is gentle but distinctive: ripe blueberry, milk chocolate, brown sugar, with a light winey acidity from the natural process and a smooth body. Brew as pour-over for the cleanest expression, or French press for a heavier-bodied cup that leans into the chocolate. 30 bags at 250g, single-harvest.</p>",
+      "variants": [
+        {"title": "250g Limited", "price": "30.00", "sku": "FCC-LIM-PAN-BQ", "inventory_quantity": 30}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/8B5CF6/white?text=LIMITED+Panama&font=Inter", "alt": "Limited Panama Boquete natural microlot"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "limited_edition", "value": "true", "type": "boolean"},
+        {"namespace": "fulcrum", "key": "harvest_year", "value": "2026", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "limited-burundi-microlot",
+      "title": "LIMITED - Burundi Kayanza Microlot",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Limited Edition",
+      "tags": ["limited", "burundi", "microlot", "washed", "kayanza"],
+      "body_html": "<p>A washed microlot from the Kayanza province of Burundi, 1,900m. Bourbon cultivar, fully washed at the Gakenke station, dried 22 days on raised African beds. Burundi is one of Africa's most overlooked specialty origins; when sorted carefully, the cups rival Kenya at half the import volume.</p><p>Cup is structured and complex: black tea body, raspberry, plum, honey, with a juicy acidity that doesn't tip into sourness. Roasted light. 22 bags at 250g, single washing station, single harvest. Brew exclusively as pour-over to honor the lot's complexity. We will not get this lot again - 2026 harvest only.</p>",
+      "variants": [
+        {"title": "250g Limited", "price": "33.00", "sku": "FCC-LIM-BDI-KY", "inventory_quantity": 22}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/8B5CF6/white?text=LIMITED+Burundi&font=Inter", "alt": "Limited Burundi Kayanza microlot"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "limited_edition", "value": "true", "type": "boolean"},
+        {"namespace": "fulcrum", "key": "harvest_year", "value": "2026", "type": "number_integer"}
+      ]
+    },
+    {
+      "handle": "limited-guatemala-microlot",
+      "title": "LIMITED - Guatemala Acatenango Microlot",
+      "vendor": "Fulcrum Coffee Co",
+      "product_type": "Limited Edition",
+      "tags": ["limited", "guatemala", "microlot", "washed", "acatenango"],
+      "body_html": "<p>A washed Bourbon and Caturra microlot from a single 4-hectare farm on the slopes of Volcan Acatenango at 1,750m. Volcanic soil, daily mist, hand-picked cherries, washed at the farm's micro-mill, dried 12 days on patios. Roasted medium.</p><p>Cup is dense and architectural: dark chocolate, toasted hazelnut, ripe black cherry, brown sugar, with a smoky volcanic body that lingers minutes after the swallow. Brew as pour-over for clarity, espresso for intensity, or French press for full body. 35 bags at 250g, 2026 harvest, will not return. The most balanced limited edition we've released this year.</p>",
+      "variants": [
+        {"title": "250g Limited", "price": "31.00", "sku": "FCC-LIM-GUA-AC", "inventory_quantity": 35}
+      ],
+      "images": [{"src": "https://placehold.co/600x600/8B5CF6/white?text=LIMITED+Guatemala&font=Inter", "alt": "Limited Guatemala Acatenango microlot"}],
+      "metafields": [
+        {"namespace": "fulcrum", "key": "limited_edition", "value": "true", "type": "boolean"},
+        {"namespace": "fulcrum", "key": "harvest_year", "value": "2026", "type": "number_integer"}
+      ]
+    }
+  ]
+}
