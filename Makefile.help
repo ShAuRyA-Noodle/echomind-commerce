@@ -1,0 +1,21 @@
+Echomind Commerce - Make targets
+=====================================================================
+
+  Target            Description
+  ----------------  ---------------------------------------------------
+  make dev          Start full stack (backend + frontend) with hot reload
+  make build        Build all docker images
+  make down         Stop and remove containers + networks
+  make logs         Tail logs for all services
+  make backend-shell   Exec /bin/bash inside the backend container
+  make frontend-shell  Exec /bin/sh inside the frontend container
+  make health       Curl backend /health endpoint (port 8000)
+  make seed-shopify Run scripts/import_to_shopify.py inside backend
+  make neo4j-init   Apply Cypher constraints + indexes (graph/schema.py)
+  make test         Run backend pytest suite
+  make lint         ruff check + eslint
+  make fmt          ruff format + prettier --write
+  make clean        Down + remove volumes + orphans
+  make help         Show this table
+=====================================================================
+Tip: copy .env.example -> .env before `make dev`.
