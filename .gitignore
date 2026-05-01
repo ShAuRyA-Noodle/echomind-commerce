@@ -1,0 +1,45 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+*-credentials.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Local data
+data/
+exports/
+neo4j-data/
+firebase-debug.log
+
+# Test artifacts
+coverage/
+.coverage
+htmlcov/
