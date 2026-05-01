@@ -1,0 +1,74 @@
+# Echomind Commerce - Docker Compose
+#
+# Quick start (judges):
+#   1. cp .env.example .env  (then fill in keys per .env.example)
+#   2. docker compose up
+#   3. open http://localhost:3000
+#
+# Notes:
+#   - Neo4j AuraDB Free is the default (cloud) - see NEO4J_URI in .env.example.
+#     The local `neo4j-local` service below is commented out by default and is
+#     only a fallback if you cannot use AuraDB.
+
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: echomind-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Hot reload during dev - mount source code into container
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    # Neo4j AuraDB is cloud, not in compose. Uncomment if using neo4j-local below.
+    # depends_on:
+    #   - neo4j-local
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: echomind-frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------
+  # Optional local Neo4j (uncomment + set NEO4J_URI=bolt://neo4j-local:7687
+  # in .env if you can't use AuraDB Free). Default path uses AuraDB cloud.
+  # ----------------------------------------------------------------------
+  # neo4j-local:
+  #   image: neo4j:5.25
+  #   container_name: echomind-neo4j
+  #   ports:
+  #     - "7474:7474"   # HTTP browser
+  #     - "7687:7687"   # Bolt
+  #   environment:
+  #     - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-echomind-dev}
+  #     - NEO4J_PLUGINS=["apoc"]
+  #   volumes:
+  #     - neo4j_data:/data
+  #     - neo4j_logs:/logs
+  #   restart: unless-stopped
+
+# volumes:
+#   neo4j_data:
+#   neo4j_logs:
