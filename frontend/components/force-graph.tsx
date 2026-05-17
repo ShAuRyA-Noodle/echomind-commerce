@@ -114,34 +114,38 @@ export function ForceGraph({
         height={height}
         cooldownTicks={cooldownTicks}
         nodeRelSize={6}
-        nodeLabel={(node: GraphNode) => `${node.type ?? "Node"} - ${node.label ?? node.id}`}
+        nodeLabel={(node: object) => {
+          const n = node as GraphNode;
+          return `${n.type ?? "Node"} - ${n.label ?? n.id}`;
+        }}
         nodeCanvasObjectMode={() => "after"}
-        nodeCanvasObject={(node: GraphNode, ctx: CanvasRenderingContext2D, scale: number) => {
-          const r = nodeRadius(node);
-          const isPulse = pulseSet.has(node.id);
+        nodeCanvasObject={(node: object, ctx: CanvasRenderingContext2D, scale: number) => {
+          const n = node as GraphNode;
+          const r = nodeRadius(n);
+          const isPulse = pulseSet.has(n.id);
           if (isPulse) {
             ctx.beginPath();
-            ctx.arc((node as { x?: number }).x ?? 0, (node as { y?: number }).y ?? 0, r * 1.8, 0, 2 * Math.PI, false);
-            ctx.strokeStyle = nodeColorFor(node);
+            ctx.arc((n as { x?: number }).x ?? 0, (n as { y?: number }).y ?? 0, r * 1.8, 0, 2 * Math.PI, false);
+            ctx.strokeStyle = nodeColorFor(n);
             ctx.lineWidth = 1.5 / scale;
             ctx.globalAlpha = 0.6;
             ctx.stroke();
             ctx.globalAlpha = 1.0;
           }
-          if (scale > 1.2 && node.label) {
-            const label = node.label.length > 32 ? `${node.label.slice(0, 32)}...` : node.label;
+          if (scale > 1.2 && n.label) {
+            const label = n.label.length > 32 ? `${n.label.slice(0, 32)}...` : n.label;
             ctx.font = `${10 / scale}px system-ui, sans-serif`;
             ctx.fillStyle = "rgba(255,255,255,0.85)";
             ctx.textAlign = "center";
-            ctx.fillText(label, (node as { x?: number }).x ?? 0, ((node as { y?: number }).y ?? 0) + r + 8 / scale);
+            ctx.fillText(label, (n as { x?: number }).x ?? 0, ((n as { y?: number }).y ?? 0) + r + 8 / scale);
           }
         }}
-        nodeColor={(n: GraphNode) => nodeColorFor(n)}
+        nodeColor={(n: object) => nodeColorFor(n as GraphNode)}
         linkColor={() => "rgba(255,255,255,0.15)"}
-        linkWidth={(l: { weight?: number }) => 0.5 + Math.min(2, (l.weight ?? 1))}
+        linkWidth={(l: object) => 0.5 + Math.min(2, ((l as { weight?: number }).weight ?? 1))}
         linkDirectionalParticles={0}
         backgroundColor="transparent"
-        onNodeClick={(node: GraphNode) => onNodeClick?.(node)}
+        onNodeClick={(node: object) => onNodeClick?.(node as GraphNode)}
       />
     </div>
   );

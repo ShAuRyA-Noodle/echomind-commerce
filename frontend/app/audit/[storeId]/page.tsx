@@ -62,7 +62,8 @@ function asCalibration(c: string): CalibrationBucket {
     : "uncertain";
 }
 
-export default function AuditPage({ params }: { params: { storeId: string } }): React.ReactElement {
+export default function AuditPage({ params }: { params: Promise<{ storeId: string }> }): React.ReactElement {
+  const { storeId } = React.use(params);
   const [summary, setSummary] = React.useState<AuditSummary | null>(null);
   const [gaps, setGaps] = React.useState<ApiGap[]>([]);
   const [error, setError] = React.useState<string | null>(null);
@@ -73,8 +74,8 @@ export default function AuditPage({ params }: { params: { storeId: string } }): 
     (async () => {
       try {
         const [s, g] = await Promise.all([
-          apiClient.request<AuditSummary>({ path: `/api/audit/${params.storeId}` }),
-          apiClient.request<{ gaps: ApiGap[] }>({ path: `/api/audit/${params.storeId}/gaps` }),
+          apiClient.request<AuditSummary>({ path: `/api/audit/${storeId}` }),
+          apiClient.request<{ gaps: ApiGap[] }>({ path: `/api/audit/${storeId}/gaps` }),
         ]);
         if (cancelled) return;
         setSummary(s);
@@ -90,7 +91,7 @@ export default function AuditPage({ params }: { params: { storeId: string } }): 
     return () => {
       cancelled = true;
     };
-  }, [params.storeId]);
+  }, [storeId]);
 
   const totals = summary?.totals;
   const readiness = summary?.readiness_score;
@@ -99,7 +100,7 @@ export default function AuditPage({ params }: { params: { storeId: string } }): 
     <SiteShell>
       <header className="mb-6 space-y-1">
         <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          /audit/{params.storeId}
+          /audit/{storeId}
         </p>
         <h1 className="text-2xl font-bold tracking-tight">AI Readiness Audit</h1>
         {error && (

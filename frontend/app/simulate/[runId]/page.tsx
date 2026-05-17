@@ -32,9 +32,10 @@ function avgLatency(latencies: number[]): number {
 export default function SimulatePage({
   params,
 }: {
-  params: { runId: string };
+  params: Promise<{ runId: string }>;
 }): React.ReactElement {
-  const { state, start } = useSimulateSocket(params.runId);
+  const { runId } = React.use(params);
+  const { state, start } = useSimulateSocket(runId);
   const [config, setConfig] = React.useState({
     n_prompts: 8,
     domain: "specialty coffee retail",
@@ -56,7 +57,7 @@ export default function SimulatePage({
       <header className="mb-4 flex items-baseline justify-between gap-4">
         <div className="space-y-1">
           <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            /simulate/{params.runId}
+            /simulate/{runId}
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Agent face-off</h1>
         </div>

@@ -32,11 +32,33 @@ const firebaseConfig: FirebaseOptions = {
   measurementId: requireEnv("NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID"),
 };
 
-export const firebaseApp: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+// Defer init until the SDK is actually exercised. Eager init at module
+// import would crash `next build` static generation when the build env has
+// no Firebase env vars (auth/invalid-api-key thrown from the worker).
+let _app: FirebaseApp | null = null;
+function ensureApp(): FirebaseApp {
+  if (_app) return _app;
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    throw new Error(
+      "Firebase is not configured. Set NEXT_PUBLIC_FIREBASE_* env vars to enable client SDK."
+    );
+  }
+  _app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  return _app;
+}
 
-export const firebaseAuth: Auth = getAuth(firebaseApp);
-export const firestore: Firestore = getFirestore(firebaseApp);
-export const firebaseStorage: FirebaseStorage = getStorage(firebaseApp);
+export const firebaseApp: FirebaseApp = new Proxy({} as FirebaseApp, {
+  get: (_t, prop) => Reflect.get(ensureApp() as object, prop),
+});
+export const firebaseAuth: Auth = new Proxy({} as Auth, {
+  get: (_t, prop) => Reflect.get(getAuth(ensureApp()) as object, prop),
+});
+export const firestore: Firestore = new Proxy({} as Firestore, {
+  get: (_t, prop) => Reflect.get(getFirestore(ensureApp()) as object, prop),
+});
+export const firebaseStorage: FirebaseStorage = new Proxy({} as FirebaseStorage, {
+  get: (_t, prop) => Reflect.get(getStorage(ensureApp()) as object, prop),
+});
 
 export function isFirebaseConfigured(): boolean {
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);

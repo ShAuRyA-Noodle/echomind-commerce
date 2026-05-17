@@ -3,19 +3,20 @@ import { GitBranch } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { SiteShell } from "@/components/site-shell";
 
-export default function PoliciesPage({
+export default async function PoliciesPage({
   params,
 }: {
-  params: { type: string };
-}): JSX.Element {
+  params: Promise<{ type: string }>;
+}): Promise<JSX.Element> {
+  const { type } = await params;
   return (
     <SiteShell>
       <header className="mb-6 space-y-1">
         <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          /policies/{params.type}
+          /policies/{type}
         </p>
         <h1 className="text-2xl font-bold tracking-tight capitalize">
-          {params.type} decision tree
+          {type} decision tree
         </h1>
         <p className="text-sm text-muted-foreground">
           Flowchart from Decision nodes. Each leaf shows per-agent compliance score. Click "Test

@@ -94,8 +94,9 @@ function useWebSpeech(onFinal: (text: string) => void): MicState {
   return { supported, listening, interimText, start, stop };
 }
 
-export default function InterviewPage({ params }: { params: { id: string } }): React.ReactElement {
-  const { state, start, nextQuestion, advancePhase, sendText } = useInterviewSocket(params.id);
+export default function InterviewPage({ params }: { params: Promise<{ id: string }> }): React.ReactElement {
+  const { id } = React.use(params);
+  const { state, start, nextQuestion, advancePhase, sendText } = useInterviewSocket(id);
   const [textDraft, setTextDraft] = React.useState("");
   const [graphNodes, setGraphNodes] = React.useState<GraphNode[]>([]);
   const [graphEdges] = React.useState<GraphEdge[]>([]);
@@ -146,7 +147,7 @@ export default function InterviewPage({ params }: { params: { id: string } }): R
       <header className="mb-4 flex items-baseline justify-between gap-4">
         <div className="space-y-1">
           <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            /interview/{params.id}
+            /interview/{id}
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Live interview</h1>
         </div>

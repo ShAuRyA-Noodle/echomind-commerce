@@ -30,7 +30,8 @@ interface ApiNodeDetail {
 
 const NODE_TYPES = Object.keys(NODE_COLORS) as NodeType[];
 
-export default function GraphPage({ params }: { params: { storeId: string } }): React.ReactElement {
+export default function GraphPage({ params }: { params: Promise<{ storeId: string }> }): React.ReactElement {
+  const { storeId } = React.use(params);
   const [nodes, setNodes] = React.useState<GraphNode[]>([]);
   const [edges, setEdges] = React.useState<GraphEdge[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -44,7 +45,7 @@ export default function GraphPage({ params }: { params: { storeId: string } }): 
     setError(null);
     try {
       const r = await apiClient.request<ApiGraphResponse>({
-        path: `/api/graph/${params.storeId}`,
+        path: `/api/graph/${storeId}`,
         query: { limit: 600 },
       });
       setNodes(
@@ -61,7 +62,7 @@ export default function GraphPage({ params }: { params: { storeId: string } }): 
     } finally {
       setLoading(false);
     }
-  }, [params.storeId]);
+  }, [storeId]);
 
   React.useEffect(() => {
     refresh();
@@ -96,7 +97,7 @@ export default function GraphPage({ params }: { params: { storeId: string } }): 
   async function onNodeClick(node: GraphNode): Promise<void> {
     try {
       const detail = await apiClient.request<ApiNodeDetail>({
-        path: `/api/graph/${params.storeId}/node/${encodeURIComponent(node.id)}`,
+        path: `/api/graph/${storeId}/node/${encodeURIComponent(node.id)}`,
       });
       setSelected(detail);
     } catch (e) {
@@ -109,7 +110,7 @@ export default function GraphPage({ params }: { params: { storeId: string } }): 
       <header className="mb-4 flex items-baseline justify-between">
         <div className="space-y-1">
           <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            /graph/{params.storeId}
+            /graph/{storeId}
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Commerce graph</h1>
         </div>

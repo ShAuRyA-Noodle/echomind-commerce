@@ -93,7 +93,8 @@ function revenueAtRisk(p: RevenueParams): { low: number; mid: number; high: numb
   return { low: base * 0.7, mid: base, high: base * 1.3 };
 }
 
-export default function DiffPage({ params }: { params: { gapId: string } }): React.ReactElement {
+export default function DiffPage({ params }: { params: Promise<{ gapId: string }> }): React.ReactElement {
+  const { gapId } = React.use(params);
   const [trace] = React.useState<ReasoningTraceData>(SAMPLE_TRACE);
   const [params_, setParams_] = React.useState<RevenueParams>(DEFAULTS);
   const [proposed, setProposed] = React.useState<string>(
@@ -122,7 +123,7 @@ export default function DiffPage({ params }: { params: { gapId: string } }): Rea
     <SiteShell>
       <header className="mb-4 space-y-1">
         <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          /diff/{params.gapId}
+          /diff/{gapId}
         </p>
         <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight">
           Gap deep dive

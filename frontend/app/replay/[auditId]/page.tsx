@@ -3,16 +3,17 @@ import { Film } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { SiteShell } from "@/components/site-shell";
 
-export default function ReplayPage({
+export default async function ReplayPage({
   params,
 }: {
-  params: { auditId: string };
-}): JSX.Element {
+  params: Promise<{ auditId: string }>;
+}): Promise<JSX.Element> {
+  const { auditId } = await params;
   return (
     <SiteShell>
       <header className="mb-6 space-y-1">
         <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          /replay/{params.auditId}
+          /replay/{auditId}
         </p>
         <h1 className="text-2xl font-bold tracking-tight">Replay theater</h1>
         <p className="text-sm text-muted-foreground">
