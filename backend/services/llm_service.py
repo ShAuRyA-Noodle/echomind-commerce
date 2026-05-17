@@ -315,10 +315,9 @@ class LLMService:
             text = self.gemini_flash("Reply with the single word: pong.")
             out["gemini_flash"] = "ok" if text else "empty"
             out["sample"] = (text or "").strip()[:64]
-        except Exception as exc:  # noqa: BLE001 - health endpoints must be defensive
+        except Exception:  # noqa: BLE001 - health endpoints must be defensive
             logger.exception("llm.healthcheck.failed")
             out["gemini_flash"] = "error"
-            out["error"] = repr(exc)
         return out
 
 

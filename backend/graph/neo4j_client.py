@@ -101,9 +101,9 @@ class Neo4jClient:
                     "server": version,
                     "database": self.database,
                 }
-        except Exception as exc:  # noqa: BLE001 - health must be defensive
+        except Exception:  # noqa: BLE001 - health must be defensive
             logger.exception("neo4j.ping.failed")
-            return {"status": "error", "error": repr(exc)}
+            return {"status": "error"}
 
     async def run(
         self,

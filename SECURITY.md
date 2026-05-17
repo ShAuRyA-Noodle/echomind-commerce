@@ -56,11 +56,13 @@ The architecture runs on free tiers (Gemini direct, OpenRouter `:free`, Neo4j Au
 
 ## 7. Vulnerability disclosure
 
-This is a hackathon submission, not a production service. If you discover a security issue:
+If you discover a security issue:
 
 1. **Do not** post it publicly.
-2. Open a private security advisory on the repository, or email the team via the address in the submission form.
+2. Email **shauryapunj404@gmail.com** with subject `[ORANGE-KID SECURITY] <brief description>`, or open a private security advisory via GitHub's *Security › Report a vulnerability* on this repo.
 3. Provide reproduction steps + impact assessment + suggested mitigation.
+
+You will receive an acknowledgement within 48 hours. Critical issues are aimed for a patch within 7 days.
 
 ## 8. What's explicitly out of scope for the hackathon submission
 

@@ -1,9 +1,16 @@
-# Secrets
+# Secrets — never commit
 .env
-.env.local
-.env.*.local
+.env.*
+*.env
 *-credentials.json
 service-account*.json
+firebase-admin-credentials.json
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+*.db.backup
 
 # Python
 __pycache__/

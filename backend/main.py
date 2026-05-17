@@ -27,6 +27,8 @@ from fastapi import APIRouter, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from api.auth_deps import verify_ws_token
+from api.auth_middleware import FirebaseAuthMiddleware, SecurityHeadersMiddleware
 from api.endpoints import (
     audit,
     auth,
@@ -106,12 +108,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(FirebaseAuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
+    expose_headers=[],
+    max_age=600,
 )
 
 api_router = APIRouter(prefix="/api")
@@ -124,7 +130,10 @@ api_router.include_router(audit.router)
 api_router.include_router(graph.router)
 api_router.include_router(auth.router)
 api_router.include_router(public_audit.router)
-api_router.include_router(debug.router)
+# Debug router exposes infra state (model lineup, env wiring, Shopify metadata).
+# Only mount when running locally so production never exposes /api/debug/*.
+if settings.is_local:
+    api_router.include_router(debug.router)
 app.include_router(api_router)
 
 
@@ -192,7 +201,10 @@ async def interview_ws(websocket: WebSocket, session_id: str) -> None:
         {type: "error",        message}
     """
     await websocket.accept()
-    logger.info("interview.ws.connected session_id=%s", session_id)
+    user = await verify_ws_token(websocket)
+    if user is None:
+        return
+    logger.info("interview.ws.connected session_id=%s uid=%s", session_id, user.get("uid"))
 
     state: dict[str, Any] = {
         "phase": "brand_mapping",
@@ -394,7 +406,10 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
         {type: "run_complete", total_calls}
     """
     await websocket.accept()
-    logger.info("simulate.ws.connected run_id=%s", run_id)
+    user = await verify_ws_token(websocket)
+    if user is None:
+        return
+    logger.info("simulate.ws.connected run_id=%s uid=%s", run_id, user.get("uid"))
     await websocket.send_json({"type": "run_open", "run_id": run_id})
 
     try:
@@ -466,10 +481,10 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
 
     except WebSocketDisconnect:
         logger.info("simulate.ws.disconnected run_id=%s", run_id)
-    except Exception as exc:  # noqa: BLE001
+    except Exception:  # noqa: BLE001
         logger.exception("simulate.ws.error run_id=%s", run_id)
         try:
-            await websocket.send_json({"type": "error", "message": repr(exc)})
+            await websocket.send_json({"type": "error", "message": "internal_error"})
             await websocket.close(code=1011)
         except Exception:  # noqa: BLE001
             pass
