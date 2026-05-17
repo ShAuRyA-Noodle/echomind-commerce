@@ -1,5 +1,5 @@
 # Echomind Commerce - Frontend (Next.js dev mode)
-FROM node:20-alpine
+FROM node:26-alpine
 
 # libc compat for some Next.js native deps
 RUN apk add --no-cache libc6-compat
