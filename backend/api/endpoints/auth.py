@@ -7,6 +7,7 @@ import logging
 from fastapi import APIRouter, status
 
 from api.schemas import NotImplementedResponse
+from utils.logging_safety import safe_log
 
 logger = logging.getLogger("echomind.api.auth")
 
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 )
 async def validate_session(payload: dict | None = None) -> NotImplementedResponse:
     """Final response: `{uid, email, expires_at}`."""
-    logger.info("auth.session payload_keys=%s", list((payload or {}).keys()))
+    logger.info("auth.session payload_keys=%s", safe_log(list((payload or {}).keys())))
     return NotImplementedResponse(
         endpoint="POST /api/auth/session",
         detail="Verifies Firebase ID token via firebase-admin, returns user descriptor.",

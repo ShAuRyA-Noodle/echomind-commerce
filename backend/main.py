@@ -52,6 +52,7 @@ from graph.neo4j_client import neo4j_client
 from graph.operations import graph_stats, upsert_typed
 from services.firebase_service import firebase_service
 from services.llm_service import llm_service
+from utils.logging_safety import safe_log
 
 logging.basicConfig(
     level=settings.LOG_LEVEL,
@@ -204,7 +205,7 @@ async def interview_ws(websocket: WebSocket, session_id: str) -> None:
     user = await verify_ws_token(websocket)
     if user is None:
         return
-    logger.info("interview.ws.connected session_id=%s uid=%s", session_id, user.get("uid"))
+    logger.info("interview.ws.connected session_id=%s uid=%s", safe_log(session_id), safe_log(user.get("uid")))
 
     state: dict[str, Any] = {
         "phase": "brand_mapping",
@@ -377,9 +378,9 @@ async def interview_ws(websocket: WebSocket, session_id: str) -> None:
                 await send({"type": "error", "message": f"unknown message type: {mtype}"})
 
     except WebSocketDisconnect:
-        logger.info("interview.ws.disconnected session_id=%s", session_id)
+        logger.info("interview.ws.disconnected session_id=%s", safe_log(session_id))
     except Exception:  # noqa: BLE001
-        logger.exception("interview.ws.error session_id=%s", session_id)
+        logger.exception("interview.ws.error session_id=%s", safe_log(session_id))
         try:
             await websocket.close(code=1011)
         except Exception:  # noqa: BLE001
@@ -409,7 +410,7 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
     user = await verify_ws_token(websocket)
     if user is None:
         return
-    logger.info("simulate.ws.connected run_id=%s uid=%s", run_id, user.get("uid"))
+    logger.info("simulate.ws.connected run_id=%s uid=%s", safe_log(run_id), safe_log(user.get("uid")))
     await websocket.send_json({"type": "run_open", "run_id": run_id})
 
     try:
@@ -480,9 +481,9 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
         )
 
     except WebSocketDisconnect:
-        logger.info("simulate.ws.disconnected run_id=%s", run_id)
+        logger.info("simulate.ws.disconnected run_id=%s", safe_log(run_id))
     except Exception:  # noqa: BLE001
-        logger.exception("simulate.ws.error run_id=%s", run_id)
+        logger.exception("simulate.ws.error run_id=%s", safe_log(run_id))
         try:
             await websocket.send_json({"type": "error", "message": "internal_error"})
             await websocket.close(code=1011)

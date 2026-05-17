@@ -39,6 +39,7 @@ from tenacity import (
 )
 
 from config.settings import settings
+from utils.logging_safety import safe_log
 
 logger = logging.getLogger("echomind.shopify")
 
@@ -368,7 +369,7 @@ class ShopifyService:
     ) -> dict[str, Any]:
         """REAL Admin GraphQL mutation - applies a fix to a live product page."""
         if self.dry_run:
-            logger.info("shopify.dry_run.product_update gid=%s", product_gid)
+            logger.info("shopify.dry_run.product_update gid=%s", safe_log(product_gid))
             return {"dry_run": True, "product_id": product_gid}
         await self.snapshot_product(product_gid)
         result = await self.admin_graphql(
@@ -383,7 +384,7 @@ class ShopifyService:
 
     async def update_page_body(self, page_gid: str, new_body: str) -> dict[str, Any]:
         if self.dry_run:
-            logger.info("shopify.dry_run.page_update gid=%s", page_gid)
+            logger.info("shopify.dry_run.page_update gid=%s", safe_log(page_gid))
             return {"dry_run": True, "page_id": page_gid}
         result = await self.admin_graphql(
             PAGE_UPDATE_MUTATION, {"id": page_gid, "page": {"body": new_body}}

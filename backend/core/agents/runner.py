@@ -118,7 +118,7 @@ async def run_swarm(
         len(buyer_prompts),
         len(lineup),
         len(flat),
-        demo_mode,
+        bool(demo_mode),
     )
     return flat
 

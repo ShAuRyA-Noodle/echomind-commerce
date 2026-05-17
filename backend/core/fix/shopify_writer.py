@@ -121,8 +121,9 @@ async def apply_fix(
             resource_id = target_product_gid
         else:
             raise ShopifyError(f"unknown fix_type: {fix.fix_type}")
-    except Exception as exc:  # noqa: BLE001 - surface to caller, log here
-        logger.exception("fix.apply_failed fix_id=%s exc=%r", fix.id, exc)
+    except Exception:  # noqa: BLE001 - surface to caller, log here
+        from utils.logging_safety import safe_log
+        logger.exception("fix.apply_failed fix_id=%s", safe_log(fix.id))
         raise
 
     return fix.model_copy(
