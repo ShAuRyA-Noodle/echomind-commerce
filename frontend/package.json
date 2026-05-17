@@ -25,7 +25,8 @@
   },
   "overrides": {
     "undici": "^6.24.0",
-    "glob": "^10.5.0"
+    "glob": "^10.5.0",
+    "postcss": "$postcss"
   },
   "devDependencies": {
     "@types/node": "^22.7.5",
