@@ -1,5 +1,5 @@
 # Echomind Commerce - Backend (FastAPI + uvicorn)
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # System deps for common Python wheels (audio, lxml, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
