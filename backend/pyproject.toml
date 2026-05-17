@@ -12,7 +12,7 @@ authors = [
 dependencies = [
     "fastapi==0.115.*",
     "uvicorn[standard]==0.30.*",
-    "websockets==13.*",
+    "websockets>=13,<17",
     "pydantic==2.9.*",
     "pydantic-settings>=2.5,<2.15",
     "neo4j==5.25.*",
