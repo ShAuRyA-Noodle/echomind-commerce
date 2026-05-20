@@ -80,6 +80,144 @@ async def get_audit_gaps(store_id: str) -> dict[str, Any]:
     return {"status": "ok", "store_id": store_id, "gaps": gaps}
 
 
+@router.get("/{store_id}/timeline", summary="Chronological swarm event timeline for replay")
+async def get_timeline(store_id: str) -> dict[str, Any]:
+    """Return all agent responses, detected gaps, and applied fixes in time order.
+
+    Used by the /replay page to build its timeline scrubber and event log.
+    """
+    logger.debug("audit.timeline store_id=%s", store_id)
+    agent_rows = await neo4j_client.run(
+        """
+        MATCH (a:AgentRepresentation)
+        OPTIONAL MATCH (b:BuyerPrompt {id: a.buyer_prompt_id})
+        RETURN a.id AS id,
+               a.agent_model AS agent_model,
+               a.response_text AS response_text,
+               coalesce(a.surfaced_products, []) AS surfaced_products,
+               a.captured_at AS captured_at,
+               a.confidence_in_recommendation AS confidence,
+               b.prompt_text AS prompt_text,
+               b.intent_class AS intent_class
+        ORDER BY a.captured_at ASC
+        LIMIT 100
+        """,
+    )
+
+    gap_rows = await neo4j_client.run(
+        """
+        MATCH (g:Gap)
+        RETURN g.id AS id, g.type AS type,
+               coalesce(g.severity, 0.5) AS severity,
+               coalesce(g.calibration_label, 'uncertain') AS calibration_label,
+               coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact,
+               coalesce(g.affected_products, []) AS affected_products
+        ORDER BY g.severity DESC
+        LIMIT 20
+        """,
+    )
+
+    fix_rows = await neo4j_client.run(
+        """
+        MATCH (f:FixSuggestion)
+        WHERE f.applied = true
+        RETURN f.id AS id, f.gap_id AS gap_id, f.fix_type AS fix_type,
+               f.applied_at AS applied_at, f.shopify_resource_id AS shopify_resource_id,
+               f.proposed_text AS proposed_text
+        ORDER BY f.applied_at ASC
+        LIMIT 20
+        """,
+    )
+
+    events = [
+        {
+            "event_type": "agent_response",
+            "id": r["id"],
+            "agent_model": r.get("agent_model", "unknown"),
+            "response_text": (r.get("response_text") or "")[:400],
+            "surfaced_products": r.get("surfaced_products") or [],
+            "captured_at": r.get("captured_at"),
+            "confidence": r.get("confidence"),
+            "prompt_text": (r.get("prompt_text") or "")[:200],
+            "intent_class": r.get("intent_class", ""),
+        }
+        for r in agent_rows
+        if r.get("id")
+    ]
+
+    return {
+        "status": "ok",
+        "store_id": store_id,
+        "events": events,
+        "gaps": [
+            {
+                "id": r.get("id"),
+                "type": r.get("type"),
+                "severity": r.get("severity", 0.5),
+                "calibration_label": r.get("calibration_label", "uncertain"),
+                "revenue_impact": r.get("revenue_impact", 0.0),
+                "affected_products": r.get("affected_products") or [],
+            }
+            for r in gap_rows
+            if r.get("id")
+        ],
+        "fixes": [
+            {
+                "id": r.get("id"),
+                "gap_id": r.get("gap_id"),
+                "fix_type": r.get("fix_type"),
+                "applied_at": r.get("applied_at"),
+                "shopify_resource_id": r.get("shopify_resource_id"),
+                "proposed_text": (r.get("proposed_text") or "")[:200],
+            }
+            for r in fix_rows
+            if r.get("id")
+        ],
+        "totals": {
+            "agent_responses": len(agent_rows),
+            "gaps": len(gap_rows),
+            "fixes_applied": len(fix_rows),
+        },
+    }
+
+
+@router.get("/{store_id}/decisions", summary="Decision nodes for policy decision tree")
+async def get_decisions(store_id: str) -> dict[str, Any]:
+    """Return all Decision nodes from Neo4j for the policy/decision-tree page."""
+    logger.debug("audit.decisions store_id=%s", store_id)
+    rows = await neo4j_client.run(
+        """
+        MATCH (d:Decision)
+        RETURN d.id AS id, d.question AS question, d.context AS context,
+               d.outcome AS outcome,
+               coalesce(d.conditions, []) AS conditions,
+               d.frequency AS frequency,
+               coalesce(d.confidence, 0.7) AS confidence
+        ORDER BY d.confidence DESC
+        LIMIT 40
+        """,
+    )
+    decisions = [
+        {
+            "id": r["id"],
+            "question": r.get("question", ""),
+            "context": r.get("context", ""),
+            "outcome": r.get("outcome", ""),
+            "conditions": r.get("conditions") or [],
+            "frequency": r.get("frequency", ""),
+            "confidence": r.get("confidence", 0.7),
+        }
+        for r in rows
+        if r.get("id")
+    ]
+    return {
+        "status": "ok",
+        "store_id": store_id,
+        "decisions": decisions,
+        "total": len(decisions),
+    }
+
+
 async def _calibration_distribution() -> dict[str, int]:
     rows = await neo4j_client.run(
         "MATCH (g:Gap) WITH coalesce(g.calibration_label,'uncertain') AS label, count(*) AS c RETURN label, c"

@@ -5,8 +5,8 @@ Wired to real Cypher candidate detection + Gemini Pro judge + calibrator
 
 Endpoints
     POST /api/diagnose/run                          - find + classify + rank gaps
-    GET  /api/diagnose/{diagnose_id}                - persisted gap list
-    GET  /api/diagnose/{diagnose_id}/gap/{gap_id}   - single gap detail
+    GET  /api/diagnose/{diagnose_id}                - all gaps from Neo4j for this run
+    GET  /api/diagnose/{diagnose_id}/gap/{gap_id}   - single gap detail + reasoning trace
 """
 
 from __future__ import annotations
@@ -17,10 +17,10 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from api.schemas import NotImplementedResponse
 from core.diagnose.cypher_diff import find_all_candidates
 from core.diagnose.judge import classify_candidate
 from core.diagnose.ranker import GapRankingInputs, rank_gaps, split_for_ui
+from graph.neo4j_client import neo4j_client
 from graph.operations import upsert_typed
 
 logger = logging.getLogger("echomind.api.diagnose")
@@ -81,26 +81,208 @@ async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
     }
 
 
-@router.get(
-    "/{diagnose_id}",
-    response_model=NotImplementedResponse,
-    summary="Persisted diagnose run (lookup by id)",
-)
-async def get_diagnose(diagnose_id: str) -> NotImplementedResponse:
-    """Run-id-keyed lookup persists in Firestore (v2). Gap nodes live in Neo4j now."""
-    return NotImplementedResponse(
-        endpoint=f"GET /api/diagnose/{diagnose_id}",
-        detail="Per-run grouping in Firestore (v2). Gap nodes queryable now via /api/graph.",
+@router.get("/{diagnose_id}", summary="All gaps from Neo4j (sorted by priority)")
+async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
+    """Return all Gap nodes from Neo4j, sorted by revenue impact then severity.
+
+    Since per-run Firestore grouping is not yet implemented, this returns the
+    full Gap set - suitable for the audit dashboard and the diff page navigator.
+    """
+    rows = await neo4j_client.run(
+        """
+        MATCH (g:Gap)
+        RETURN g.id AS id, g.type AS type, g.severity AS severity,
+               g.calibration_label AS calibration_label,
+               coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact_usd_monthly,
+               coalesce(g.affected_products, []) AS affected_products
+        ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
+        LIMIT 50
+        """,
+        {},
     )
+    gaps = [
+        {
+            "id": r["id"],
+            "type": r["type"],
+            "severity": r.get("severity", 0.5),
+            "calibration_label": r.get("calibration_label", "uncertain"),
+            "revenue_impact_usd_monthly": r.get("revenue_impact_usd_monthly", 0.0),
+            "affected_products": r.get("affected_products", []),
+        }
+        for r in rows
+        if r.get("id")
+    ]
+    return {"status": "ok", "diagnose_id": diagnose_id, "gaps": gaps, "total": len(gaps)}
 
 
 @router.get(
     "/{diagnose_id}/gap/{gap_id}",
-    response_model=NotImplementedResponse,
     summary="Single gap detail with full reasoning trace + source nodes",
 )
-async def get_gap(diagnose_id: str, gap_id: str) -> NotImplementedResponse:
-    return NotImplementedResponse(
-        endpoint=f"GET /api/diagnose/{diagnose_id}/gap/{gap_id}",
-        detail="Returns gap + reasoning chain + source subgraph + candidate fixes.",
+async def get_gap(diagnose_id: str, gap_id: str) -> dict[str, Any]:
+    """Return a Gap node with its reasoning trace and all related source nodes.
+
+    Fetches the Gap, its affected Products (with shopify_gid), the MerchantTruths
+    that led to its detection, the AgentRepresentations that were involved, and
+    any existing FixSuggestion. The frontend diff page builds its cinematic
+    reasoning-trace animation from this response.
+    """
+    logger.debug("gap.detail diagnose_id=%s gap_id=%s", diagnose_id, gap_id)
+    # 1. Fetch the Gap node
+    gap_rows = await neo4j_client.run(
+        "MATCH (g:Gap {id: $id}) RETURN g LIMIT 1",
+        {"id": gap_id},
     )
+    if not gap_rows:
+        return {"status": "not_found", "gap_id": gap_id}
+
+    g: dict[str, Any] = gap_rows[0]["g"]
+    affected_products: list[str] = g.get("affected_products") or []
+
+    # 2. Affected Product nodes (shopify_gid needed for fix apply)
+    product_rows: list[dict[str, Any]] = []
+    if affected_products:
+        product_rows = await neo4j_client.run(
+            """
+            MATCH (p:Product) WHERE p.id IN $ids
+            RETURN p.id AS id, p.title AS title,
+                   p.shopify_gid AS shopify_gid,
+                   p.description AS description
+            LIMIT 10
+            """,
+            {"ids": affected_products},
+        )
+
+    # 3. MerchantTruths related to affected products (via DESCRIBES edge)
+    truth_rows: list[dict[str, Any]] = []
+    if affected_products:
+        truth_rows = await neo4j_client.run(
+            """
+            MATCH (m:MerchantTruth)-[:DESCRIBES]->(p:Product)
+            WHERE p.id IN $ids
+            RETURN m.id AS id, m.statement AS statement,
+                   m.tacit_category AS tacit_category,
+                   m.tacit_level AS tacit_level,
+                   m.confidence AS confidence,
+                   p.id AS product_id
+            LIMIT 10
+            """,
+            {"ids": affected_products},
+        )
+    # Fallback: any MerchantTruths when edges not yet written
+    if not truth_rows:
+        truth_rows = await neo4j_client.run(
+            """
+            MATCH (m:MerchantTruth)
+            RETURN m.id AS id, m.statement AS statement,
+                   m.tacit_category AS tacit_category,
+                   m.tacit_level AS tacit_level,
+                   m.confidence AS confidence,
+                   null AS product_id
+            LIMIT 5
+            """,
+            {},
+        )
+
+    # 4. AgentRepresentations that mention the affected products
+    agent_rows: list[dict[str, Any]] = []
+    if affected_products:
+        agent_rows = await neo4j_client.run(
+            """
+            MATCH (a:AgentRepresentation)-[:MENTIONS]->(p:Product)
+            WHERE p.id IN $ids
+            RETURN a.id AS id, a.agent_model AS agent_model,
+                   a.response_text AS response_text,
+                   a.confidence_in_recommendation AS confidence,
+                   p.id AS product_id
+            LIMIT 20
+            """,
+            {"ids": affected_products},
+        )
+    # Fallback: any AgentRepresentations when MENTIONS edges not yet written
+    if not agent_rows:
+        agent_rows = await neo4j_client.run(
+            """
+            MATCH (a:AgentRepresentation)
+            RETURN a.id AS id, a.agent_model AS agent_model,
+                   a.response_text AS response_text,
+                   a.confidence_in_recommendation AS confidence,
+                   null AS product_id
+            LIMIT 10
+            """,
+            {},
+        )
+
+    # 5. Existing FixSuggestion for this gap (applied one preferred)
+    fix_rows = await neo4j_client.run(
+        """
+        MATCH (f:FixSuggestion)
+        WHERE f.gap_id = $gap_id
+        RETURN f ORDER BY f.applied DESC
+        LIMIT 1
+        """,
+        {"gap_id": gap_id},
+    )
+    fix: dict[str, Any] | None = fix_rows[0]["f"] if fix_rows else None
+
+    return {
+        "status": "ok",
+        "gap": {
+            "id": g.get("id", gap_id),
+            "type": g.get("type", "omission"),
+            "severity": g.get("severity", 0.5),
+            "revenue_impact_usd_monthly": g.get("revenue_impact_usd_monthly", 0.0),
+            "calibration_label": g.get("calibration_label", "uncertain"),
+            "uncertainty_type": g.get("uncertainty_type"),
+            "reasoning_chain": g.get("reasoning_chain", ""),
+            "affected_products": [
+                {
+                    "product_id": r["id"],
+                    "title": r.get("title", r["id"]),
+                    "shopify_gid": r.get("shopify_gid"),
+                    "description": r.get("description", ""),
+                }
+                for r in product_rows
+            ]
+            if product_rows
+            else [
+                {"product_id": pid, "title": pid, "shopify_gid": None, "description": ""}
+                for pid in affected_products
+            ],
+        },
+        "merchant_truths": [
+            {
+                "id": r["id"],
+                "statement": r.get("statement", ""),
+                "tacit_category": r.get("tacit_category"),
+                "tacit_level": r.get("tacit_level"),
+                "confidence": r.get("confidence", 0.8),
+                "product_id": r.get("product_id"),
+            }
+            for r in truth_rows
+            if r.get("id")
+        ],
+        "agent_representations": [
+            {
+                "id": r["id"],
+                "agent_model": r.get("agent_model", "unknown"),
+                "response_text": r.get("response_text", ""),
+                "confidence": r.get("confidence"),
+                "product_id": r.get("product_id"),
+            }
+            for r in agent_rows
+            if r.get("id")
+        ],
+        "fix_suggestion": {
+            "id": fix.get("id"),
+            "fix_type": fix.get("fix_type", "copy_rewrite"),
+            "proposed_text": fix.get("proposed_text", ""),
+            "applied": fix.get("applied", False),
+            "applied_at": fix.get("applied_at"),
+            "predicted_delta_low": fix.get("predicted_delta_low"),
+            "predicted_delta_high": fix.get("predicted_delta_high"),
+            "voice_match_notes": fix.get("voice_match_notes"),
+        }
+        if fix
+        else None,
+    }
