@@ -182,21 +182,48 @@ async def get_timeline(store_id: str) -> dict[str, Any]:
 
 
 @router.get("/{store_id}/decisions", summary="Decision nodes for policy decision tree")
-async def get_decisions(store_id: str) -> dict[str, Any]:
-    """Return all Decision nodes from Neo4j for the policy/decision-tree page."""
-    logger.debug("audit.decisions store_id=%s", store_id)
-    rows = await neo4j_client.run(
-        """
-        MATCH (d:Decision)
-        RETURN d.id AS id, d.question AS question, d.context AS context,
-               d.outcome AS outcome,
-               coalesce(d.conditions, []) AS conditions,
-               d.frequency AS frequency,
-               coalesce(d.confidence, 0.7) AS confidence
-        ORDER BY d.confidence DESC
-        LIMIT 40
-        """,
-    )
+async def get_decisions(store_id: str, type: str | None = None) -> dict[str, Any]:
+    """Return Decision nodes for the policy/decision-tree page.
+
+    Optional `type` query param filters server-side by substring match against
+    question/context/outcome (case-insensitive). `type` values like
+    "returns"/"shipping"/"warranty" map naturally; "all" or omitted = no filter.
+    """
+    logger.debug("audit.decisions store_id=%s type=%s", store_id, type)
+    needle = (type or "").replace("-", " ").strip().lower()
+    apply_filter = bool(needle) and needle != "all"
+
+    if apply_filter:
+        rows = await neo4j_client.run(
+            """
+            MATCH (d:Decision)
+            WHERE toLower(coalesce(d.question, ''))  CONTAINS $needle
+               OR toLower(coalesce(d.context, ''))   CONTAINS $needle
+               OR toLower(coalesce(d.outcome, ''))   CONTAINS $needle
+            RETURN d.id AS id, d.question AS question, d.context AS context,
+                   d.outcome AS outcome,
+                   coalesce(d.conditions, []) AS conditions,
+                   d.frequency AS frequency,
+                   coalesce(d.confidence, 0.7) AS confidence
+            ORDER BY d.confidence DESC
+            LIMIT 40
+            """,
+            {"needle": needle},
+        )
+    else:
+        rows = await neo4j_client.run(
+            """
+            MATCH (d:Decision)
+            RETURN d.id AS id, d.question AS question, d.context AS context,
+                   d.outcome AS outcome,
+                   coalesce(d.conditions, []) AS conditions,
+                   d.frequency AS frequency,
+                   coalesce(d.confidence, 0.7) AS confidence
+            ORDER BY d.confidence DESC
+            LIMIT 40
+            """,
+        )
+
     decisions = [
         {
             "id": r["id"],
@@ -213,6 +240,7 @@ async def get_decisions(store_id: str) -> dict[str, Any]:
     return {
         "status": "ok",
         "store_id": store_id,
+        "filter_type": type,
         "decisions": decisions,
         "total": len(decisions),
     }

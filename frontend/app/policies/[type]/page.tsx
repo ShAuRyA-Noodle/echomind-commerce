@@ -41,17 +41,6 @@ function confidenceLabel(c: number): string {
   return "low";
 }
 
-function filterByType(decisions: DecisionNode[], type: string): DecisionNode[] {
-  if (!type || type === "all") return decisions;
-  const q = type.toLowerCase().replace(/-/g, " ");
-  return decisions.filter(
-    (d) =>
-      d.question?.toLowerCase().includes(q) ||
-      d.context?.toLowerCase().includes(q) ||
-      d.outcome?.toLowerCase().includes(q),
-  );
-}
-
 // ─── Decision Card ────────────────────────────────────────────────────────────
 
 function DecisionCard({ node, index }: { node: DecisionNode; index: number }): React.ReactElement {
@@ -166,8 +155,10 @@ export default function PoliciesPage({
     let cancelled = false;
     (async () => {
       try {
+        const query = type && type !== "all" ? { type } : undefined;
         const res = await request<DecisionsResponse>({
           path: "/api/audit/demo/decisions",
+          query,
         });
         if (!cancelled) setData(res);
       } catch (e) {
@@ -177,9 +168,9 @@ export default function PoliciesPage({
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [type]);
 
-  const filtered = data ? filterByType(data.decisions, type) : [];
+  const filtered = data?.decisions ?? [];
   const displayType = type.replace(/-/g, " ");
 
   return (
