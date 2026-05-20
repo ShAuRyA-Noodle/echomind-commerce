@@ -14,6 +14,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
@@ -21,7 +23,7 @@ from core.diagnose.cypher_diff import find_all_candidates
 from core.diagnose.judge import classify_candidate
 from core.diagnose.ranker import GapRankingInputs, rank_gaps, split_for_ui
 from graph.neo4j_client import neo4j_client
-from graph.operations import upsert_typed
+from graph.operations import deterministic_id, upsert_typed
 
 logger = logging.getLogger("echomind.api.diagnose")
 router = APIRouter(prefix="/diagnose", tags=["diagnose"])
@@ -42,14 +44,23 @@ async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
         4. Rank by gap_priority, split into 4 UI buckets
     """
     surface_loss_rate = req.surface_loss_rate if req else 0.5
+    started_at = datetime.now(timezone.utc)
+    run_id = deterministic_id("drun", started_at.isoformat(), str(surface_loss_rate))
+
     candidates = await find_all_candidates()
     flat_candidates = [c for group in candidates.values() for c in group]
-    logger.info("diagnose.candidates total=%d", len(flat_candidates))
+    logger.info("diagnose.candidates run_id=%s total=%d", run_id, len(flat_candidates))
 
     classified = []
     for cand in flat_candidates:
         gap = await classify_candidate(cand, surface_loss_rate=surface_loss_rate)
         await upsert_typed(gap, "Gap")
+        # Tag with run id + timestamp so subsequent /api/diagnose/{run_id} calls
+        # can filter; legacy gaps (no diagnose_run_id) still fall back to "latest".
+        await neo4j_client.run(
+            "MATCH (g:Gap {id: $id}) SET g.diagnose_run_id = $rid, g.diagnose_run_at = $ts",
+            {"id": gap.id, "rid": run_id, "ts": started_at.isoformat()},
+        )
         classified.append(gap)
 
     inputs_by_id = {g.id: GapRankingInputs() for g in classified}
@@ -58,6 +69,8 @@ async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
 
     return {
         "status": "ok",
+        "run_id": run_id,
+        "started_at": started_at.isoformat(),
         "candidates_found": len(flat_candidates),
         "candidates_by_type": {k: len(v) for k, v in candidates.items()},
         "gaps_classified": len(classified),
@@ -81,25 +94,60 @@ async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
     }
 
 
-@router.get("/{diagnose_id}", summary="All gaps from Neo4j (sorted by priority)")
+@router.get("/{diagnose_id}", summary="Gaps for a specific diagnose run (or latest if `_`/`latest`)")
 async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
-    """Return all Gap nodes from Neo4j, sorted by revenue impact then severity.
+    """Return Gap nodes scoped to a diagnose run.
 
-    Since per-run Firestore grouping is not yet implemented, this returns the
-    full Gap set - suitable for the audit dashboard and the diff page navigator.
+    Resolution order:
+        - `diagnose_id` == "_" or "latest": pick most recent `diagnose_run_id`
+          present on any Gap; if none have a run id (legacy), return all.
+        - otherwise: filter by exact `diagnose_run_id`.
     """
-    rows = await neo4j_client.run(
-        """
-        MATCH (g:Gap)
-        RETURN g.id AS id, g.type AS type, g.severity AS severity,
-               g.calibration_label AS calibration_label,
-               coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact_usd_monthly,
-               coalesce(g.affected_products, []) AS affected_products
-        ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
-        LIMIT 50
-        """,
-        {},
-    )
+    resolved_id = diagnose_id
+    if diagnose_id in {"_", "latest"}:
+        latest = await neo4j_client.run(
+            """
+            MATCH (g:Gap) WHERE g.diagnose_run_id IS NOT NULL
+            RETURN g.diagnose_run_id AS rid, g.diagnose_run_at AS ts
+            ORDER BY g.diagnose_run_at DESC
+            LIMIT 1
+            """,
+            {},
+        )
+        resolved_id = latest[0]["rid"] if latest else None
+
+    if resolved_id:
+        rows = await neo4j_client.run(
+            """
+            MATCH (g:Gap) WHERE g.diagnose_run_id = $rid
+            RETURN g.id AS id, g.type AS type, g.severity AS severity,
+                   g.calibration_label AS calibration_label,
+                   coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact_usd_monthly,
+                   coalesce(g.affected_products, []) AS affected_products,
+                   g.diagnose_run_id AS diagnose_run_id,
+                   g.diagnose_run_at AS diagnose_run_at
+            ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
+            LIMIT 50
+            """,
+            {"rid": resolved_id},
+        )
+    else:
+        # Legacy fallback: no Gap has a run id yet (pre-migration data).
+        rows = await neo4j_client.run(
+            """
+            MATCH (g:Gap)
+            RETURN g.id AS id, g.type AS type, g.severity AS severity,
+                   g.calibration_label AS calibration_label,
+                   coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact_usd_monthly,
+                   coalesce(g.affected_products, []) AS affected_products,
+                   null AS diagnose_run_id,
+                   null AS diagnose_run_at
+            ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
+            LIMIT 50
+            """,
+            {},
+        )
+
     gaps = [
         {
             "id": r["id"],
@@ -108,11 +156,19 @@ async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
             "calibration_label": r.get("calibration_label", "uncertain"),
             "revenue_impact_usd_monthly": r.get("revenue_impact_usd_monthly", 0.0),
             "affected_products": r.get("affected_products", []),
+            "diagnose_run_id": r.get("diagnose_run_id"),
+            "diagnose_run_at": r.get("diagnose_run_at"),
         }
         for r in rows
         if r.get("id")
     ]
-    return {"status": "ok", "diagnose_id": diagnose_id, "gaps": gaps, "total": len(gaps)}
+    return {
+        "status": "ok",
+        "diagnose_id": diagnose_id,
+        "resolved_run_id": resolved_id,
+        "gaps": gaps,
+        "total": len(gaps),
+    }
 
 
 @router.get(
