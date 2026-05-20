@@ -180,6 +180,26 @@ interface ApplyResult {
   error?: string;
 }
 
+interface RetestDelta {
+  before_surface_rate: number;
+  after_surface_rate: number;
+  delta_pp: number;
+  in_predicted_range: boolean;
+  n_calls_before: number;
+  n_calls_after: number;
+}
+
+interface RetestResult {
+  status: string;
+  fix_id?: string;
+  gap_id?: string;
+  delta?: RetestDelta;
+  n_buyer_prompts?: number;
+  n_after_reps?: number;
+  detail?: string;
+  error?: string;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function DiffPage({ params }: { params: Promise<{ gapId: string }> }): React.ReactElement {
@@ -193,6 +213,8 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
   const [proposed, setProposed] = React.useState<string>("");
   const [applying, setApplying] = React.useState(false);
   const [applyResult, setApplyResult] = React.useState<ApplyResult | null>(null);
+  const [retesting, setRetesting] = React.useState(false);
+  const [retestResult, setRetestResult] = React.useState<RetestResult | null>(null);
 
   // Fetch gap detail from live Neo4j on mount
   React.useEffect(() => {
@@ -252,6 +274,28 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
       setApplyResult({ applied: false, error: e instanceof Error ? e.message : String(e) });
     } finally {
       setApplying(false);
+    }
+  }
+
+  async function retestFix(): Promise<void> {
+    if (!data || retesting) return;
+    const fixId = data.fix_suggestion?.id ?? applyResult?.shopify_resource_id ?? `fix_${gapId}`;
+    setRetesting(true);
+    setRetestResult(null);
+    try {
+      const res = await request<RetestResult>({
+        method: "POST",
+        path: `/api/fix/retest/${encodeURIComponent(fixId)}`,
+        body: { demo_mode: true },
+      });
+      setRetestResult(res);
+    } catch (e) {
+      setRetestResult({
+        status: "error",
+        error: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setRetesting(false);
     }
   }
 
@@ -461,8 +505,8 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
                       : ""}
                   </p>
                   <p className="text-muted-foreground">
-                    Fix persisted to Neo4j as FixSuggestion node. Re-test runs the same buyer
-                    prompts against the same agents and populates observed_delta.
+                    Fix persisted to Neo4j as FixSuggestion node. Click <span className="font-mono">Re-test</span> below
+                    to rerun the swarm and measure observed_delta.
                   </p>
                 </div>
               )}
@@ -479,6 +523,69 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
                   Voice: {data.fix_suggestion.voice_match_notes}
                 </p>
               )}
+
+              {/* Re-test row */}
+              <div className="border-t border-border/40 pt-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Measure observed delta — rerun swarm against historical buyer prompts.
+                  </p>
+                  <Button
+                    onClick={retestFix}
+                    size="sm"
+                    variant="outline"
+                    disabled={retesting}
+                  >
+                    {retesting ? (
+                      <><Loader2 className="mr-1 h-3 w-3 animate-spin" />Re-testing…</>
+                    ) : retestResult?.delta ? (
+                      "Re-test again"
+                    ) : (
+                      "Re-test"
+                    )}
+                  </Button>
+                </div>
+
+                {retestResult?.delta && (
+                  <div className="mt-3 rounded-md border border-blue-500/40 bg-blue-500/5 p-3 text-xs">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="font-mono text-blue-300">
+                        observed_delta: {retestResult.delta.delta_pp >= 0 ? "+" : ""}
+                        {retestResult.delta.delta_pp.toFixed(1)} pp surface rate
+                      </p>
+                      <span
+                        className={`rounded-sm border px-1.5 py-0.5 font-mono text-[10px] ${
+                          retestResult.delta.in_predicted_range
+                            ? "border-emerald-500/40 text-emerald-400"
+                            : "border-yellow-500/40 text-yellow-400"
+                        }`}
+                      >
+                        {retestResult.delta.in_predicted_range ? "in predicted range" : "outside predicted range"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 font-mono">
+                      <span>
+                        before {Math.round(retestResult.delta.before_surface_rate * 100)}%
+                      </span>
+                      <span className="text-muted-foreground">→</span>
+                      <span>
+                        after {Math.round(retestResult.delta.after_surface_rate * 100)}%
+                      </span>
+                      <span className="ml-auto text-muted-foreground">
+                        {retestResult.delta.n_calls_before} before · {retestResult.delta.n_calls_after} after
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {retestResult?.status && retestResult.status !== "ok" && !retestResult.delta && (
+                  <div className="mt-3 rounded-md border border-yellow-500/40 bg-yellow-500/5 p-3 text-xs text-yellow-300">
+                    <p className="font-mono">{retestResult.status}</p>
+                    {retestResult.detail && <p className="mt-1 text-muted-foreground">{retestResult.detail}</p>}
+                    {retestResult.error && <p className="mt-1 text-destructive">{retestResult.error}</p>}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
