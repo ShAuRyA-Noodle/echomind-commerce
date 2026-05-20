@@ -226,7 +226,7 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
         });
         if (cancelled) return;
         if (res.status === "not_found") {
-          setFetchError("Gap not found in graph — run /api/diagnose/run first.");
+          setFetchError("Gap not found in graph - run /api/diagnose/run first.");
         } else {
           setData(res);
           // Seed revenue params from gap severity
@@ -348,7 +348,7 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               {data.agent_representations.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No agent responses recorded yet — run a swarm simulation.</p>
+                <p className="text-xs text-muted-foreground">No agent responses recorded yet - run a swarm simulation.</p>
               ) : (
                 data.agent_representations.slice(0, 4).map((a) => (
                   <div
@@ -375,7 +375,7 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               {data.merchant_truths.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No merchant truths extracted yet — run an interview first.</p>
+                <p className="text-xs text-muted-foreground">No merchant truths extracted yet - run an interview first.</p>
               ) : (
                 data.merchant_truths.slice(0, 3).map((t) => (
                   <div key={t.id} className="rounded-md border border-primary/30 bg-primary/5 p-3">
@@ -528,7 +528,7 @@ export default function DiffPage({ params }: { params: Promise<{ gapId: string }
               <div className="border-t border-border/40 pt-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    Measure observed delta — rerun swarm against historical buyer prompts.
+                    Measure observed delta - rerun swarm against historical buyer prompts.
                   </p>
                   <Button
                     onClick={retestFix}

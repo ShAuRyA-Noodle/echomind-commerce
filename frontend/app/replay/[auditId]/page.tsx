@@ -185,7 +185,7 @@ export default function ReplayPage({
           Replay theater
         </h1>
         <p className="text-sm text-muted-foreground">
-          Full audit lifecycle — swarm responses, gap detections, and applied fixes in chronological order.
+          Full audit lifecycle - swarm responses, gap detections, and applied fixes in chronological order.
         </p>
       </header>
 

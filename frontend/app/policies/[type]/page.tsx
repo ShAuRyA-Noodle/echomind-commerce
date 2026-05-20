@@ -185,7 +185,7 @@ export default function PoliciesPage({
         </h1>
         <p className="text-sm text-muted-foreground">
           Merchant decision nodes extracted from the Socratic interview. Each node shows
-          the question, context, outcome, and confidence — live from Neo4j.
+          the question, context, outcome, and confidence - live from Neo4j.
         </p>
       </header>
 
