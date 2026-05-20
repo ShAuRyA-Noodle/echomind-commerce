@@ -4,7 +4,7 @@ import * as React from "react";
 import { Film, Bot, AlertTriangle, Wrench, Loader2, AlertCircle, Clock } from "lucide-react";
 
 import { SiteShell } from "@/components/site-shell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CalibrationBadge } from "@/components/calibration-badge";
 import { request } from "@/lib/api-client";
 import type { CalibrationBucket } from "@/lib/colors";
@@ -230,7 +230,7 @@ export default function ReplayPage({
                   Swarm responses ({totals.agent_responses})
                 </h2>
                 <div className="space-y-4">
-                  {Array.from(promptGroups.entries()).map(([prompt, events]) => (
+                  {Array.from(promptGroups.entries()).map(([prompt, events]: [string, AgentEvent[]]) => (
                     <Card key={prompt} className="border-border/60">
                       <CardHeader className="pb-2">
                         <div className="flex items-start gap-3">

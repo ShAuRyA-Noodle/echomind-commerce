@@ -115,7 +115,7 @@ function buildTrace(data: ApiGapDetail): ReasoningTraceData {
     });
   }
 
-  const misrep = agent_representations.filter((a, i) => i < 3);
+  const misrep = agent_representations.slice(0, 3);
   if (misrep.length > 0) {
     steps.push({
       step: steps.length + 1,
