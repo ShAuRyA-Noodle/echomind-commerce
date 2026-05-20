@@ -33,8 +33,9 @@ export interface ForceGraphProps {
   width?: number;
   height?: number;
   onNodeClick?: (node: GraphNode) => void;
-  /** Default true. Re-runs the d3 force simulation when nodes/edges change. */
   cooldownTicks?: number;
+  /** Auto-zoom to fit all nodes after simulation settles. Default true. */
+  autoFit?: boolean;
   className?: string;
 }
 
@@ -63,10 +64,13 @@ export function ForceGraph({
   width,
   height = 520,
   onNodeClick,
-  cooldownTicks = 50,
+  cooldownTicks = 80,
+  autoFit = true,
   className,
 }: ForceGraphProps): React.ReactElement {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const graphRef = React.useRef<any>(null);
   const [containerWidth, setContainerWidth] = React.useState<number>(width ?? 800);
   const [pulseSet, setPulseSet] = React.useState<Set<string>>(new Set());
 
@@ -107,16 +111,22 @@ export function ForceGraph({
   );
 
   return (
-    <div ref={containerRef} className={className} style={{ height, width: width ?? "100%" }}>
+    <div ref={containerRef} className={className} style={{ height, width: width ?? "100%", position: "relative" }}>
       <ForceGraph2D
+        ref={graphRef}
         graphData={data}
         width={width ?? containerWidth}
         height={height}
         cooldownTicks={cooldownTicks}
-        nodeRelSize={6}
+        onEngineStop={() => {
+          if (autoFit && graphRef.current && nodes.length > 0) {
+            graphRef.current.zoomToFit(400, 24);
+          }
+        }}
+        nodeRelSize={5}
         nodeLabel={(node: object) => {
           const n = node as GraphNode;
-          return `${n.type ?? "Node"} - ${n.label ?? n.id}`;
+          return `${n.type ?? "Node"}: ${n.label ?? n.id}`;
         }}
         nodeCanvasObjectMode={() => "after"}
         nodeCanvasObject={(node: object, ctx: CanvasRenderingContext2D, scale: number) => {
@@ -125,28 +135,65 @@ export function ForceGraph({
           const isPulse = pulseSet.has(n.id);
           if (isPulse) {
             ctx.beginPath();
-            ctx.arc((n as { x?: number }).x ?? 0, (n as { y?: number }).y ?? 0, r * 1.8, 0, 2 * Math.PI, false);
+            ctx.arc((n as { x?: number }).x ?? 0, (n as { y?: number }).y ?? 0, r * 2.2, 0, 2 * Math.PI, false);
             ctx.strokeStyle = nodeColorFor(n);
-            ctx.lineWidth = 1.5 / scale;
-            ctx.globalAlpha = 0.6;
+            ctx.lineWidth = 2 / scale;
+            ctx.globalAlpha = 0.7;
             ctx.stroke();
             ctx.globalAlpha = 1.0;
           }
-          if (scale > 1.2 && n.label) {
-            const label = n.label.length > 32 ? `${n.label.slice(0, 32)}...` : n.label;
-            ctx.font = `${10 / scale}px system-ui, sans-serif`;
-            ctx.fillStyle = "rgba(255,255,255,0.85)";
+          // Always show label (not just on zoom) for mini-graph readability
+          if (n.label) {
+            const label = n.label.length > 22 ? `${n.label.slice(0, 22)}...` : n.label;
+            const fontSize = Math.max(8, Math.min(11, 10 / (scale || 1)));
+            ctx.font = `${fontSize}px system-ui, sans-serif`;
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
             ctx.textAlign = "center";
-            ctx.fillText(label, (n as { x?: number }).x ?? 0, ((n as { y?: number }).y ?? 0) + r + 8 / scale);
+            ctx.fillText(label, (n as { x?: number }).x ?? 0, ((n as { y?: number }).y ?? 0) + r + fontSize + 2);
           }
         }}
         nodeColor={(n: object) => nodeColorFor(n as GraphNode)}
-        linkColor={() => "rgba(255,255,255,0.15)"}
-        linkWidth={(l: object) => 0.5 + Math.min(2, ((l as { weight?: number }).weight ?? 1))}
+        linkColor={() => "rgba(255,255,255,0.2)"}
+        linkWidth={(l: object) => 0.8 + Math.min(2, ((l as { weight?: number }).weight ?? 1))}
+        linkDirectionalArrowLength={3}
+        linkDirectionalArrowRelPos={1}
         linkDirectionalParticles={0}
         backgroundColor="transparent"
+        enableZoomInteraction
+        enablePanInteraction
         onNodeClick={(node: object) => onNodeClick?.(node as GraphNode)}
       />
+      {/* Zoom controls overlay */}
+      <div style={{ position: "absolute", top: 8, right: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+        <button
+          type="button"
+          onClick={() => graphRef.current?.zoom(1.4, 200)}
+          style={{
+            width: 28, height: 28, borderRadius: 6,
+            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+            color: "white", fontSize: 18, cursor: "pointer", lineHeight: 1,
+          }}
+        >+</button>
+        <button
+          type="button"
+          onClick={() => graphRef.current?.zoom(0.7, 200)}
+          style={{
+            width: 28, height: 28, borderRadius: 6,
+            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+            color: "white", fontSize: 18, cursor: "pointer", lineHeight: 1,
+          }}
+        >-</button>
+        <button
+          type="button"
+          onClick={() => nodes.length > 0 && graphRef.current?.zoomToFit(400, 24)}
+          style={{
+            width: 28, height: 28, borderRadius: 6,
+            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+            color: "white", fontSize: 11, cursor: "pointer", lineHeight: 1,
+          }}
+          title="Fit all"
+        >⊡</button>
+      </div>
     </div>
   );
 }

@@ -157,6 +157,21 @@ class LLMService:
             )
         return self._openrouter_async
 
+    def _groq_call_sync(self, prompt: str, *, temperature: float = 0.4) -> str:
+        """Groq fallback for Gemini Flash (same Llama-3.3-70B, OpenAI-compatible)."""
+        if not settings.GROQ_API_KEY:
+            raise RuntimeError("GROQ_API_KEY not configured")
+        client = OpenAI(api_key=settings.GROQ_API_KEY, base_url=settings.GROQ_BASE_URL)
+        completion = client.chat.completions.create(
+            model=settings.GROQ_FLASH_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=temperature,
+            max_tokens=4096,
+        )
+        if not completion.choices:
+            return ""
+        return completion.choices[0].message.content or ""
+
     # ------------------------------------------------------------------
     # Gemini - synchronous variants (callable from sync code & threadpool)
     # ------------------------------------------------------------------
@@ -190,14 +205,22 @@ class LLMService:
         *,
         temperature: float = 0.4,
     ) -> str:
-        """Gemini Flash text generation. Returns raw string output."""
+        """Gemini Flash text generation with Groq fallback when quota exhausted."""
         logger.debug("llm.gemini_flash chars=%d schema=%s", len(prompt), bool(json_schema))
-        return self._gemini_call_sync(
-            model_name=settings.GEMINI_FLASH_MODEL,
-            prompt=prompt,
-            json_schema=json_schema,
-            temperature=temperature,
-        )
+        try:
+            return self._gemini_call_sync(
+                model_name=settings.GEMINI_FLASH_MODEL,
+                prompt=prompt,
+                json_schema=json_schema,
+                temperature=temperature,
+            )
+        except Exception as exc:  # noqa: BLE001
+            exc_str = repr(exc)
+            if "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower():
+                if settings.GROQ_API_KEY:
+                    logger.warning("llm.gemini_flash.quota_exceeded - falling back to Groq")
+                    return self._groq_call_sync(prompt, temperature=temperature)
+            raise
 
     @_retry_decorator()
     def gemini_pro(

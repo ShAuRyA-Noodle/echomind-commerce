@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     GEMINI_PRO_MODEL: str = "gemini-2.5-pro"
     GEMINI_EMBEDDING_MODEL: str = "text-embedding-004"
 
+    # ---------- Groq (fallback when Gemini Flash quota exhausted) ----------
+    # Free tier: 14,400 req/day, 100K TPM. OpenAI-compatible endpoint.
+    GROQ_API_KEY: str = ""
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_FLASH_MODEL: str = "llama-3.3-70b-versatile"
+
     # ---------- OpenRouter (agent swarm - free-tier-first per Decision Log #4) ----------
     # Model lineup verified live against /v1/models on 2026-05-01. The original
     # qwen-2.5-72b / deepseek-chat / gemini-2.0-flash-exp free aliases moved off
