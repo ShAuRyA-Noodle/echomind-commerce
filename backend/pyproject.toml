@@ -15,7 +15,7 @@ dependencies = [
     "websockets==13.*",
     "pydantic==2.9.*",
     "pydantic-settings>=2.5,<2.15",
-    "neo4j==5.25.*",
+    "neo4j>=5.25,<6.3",
     "google-generativeai==0.8.*",
     "google-cloud-speech==2.27.*",
     "openai>=1.50",
