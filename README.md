@@ -13,7 +13,7 @@ Echomind Commerce interviews a merchant for tacit knowledge no document holds, s
 [![Neo4j](https://img.shields.io/badge/neo4j-AuraDB-008CC1.svg)](https://neo4j.com/cloud/aura/)
 [![Gemini](https://img.shields.io/badge/gemini-2.5-4285F4.svg)](https://aistudio.google.com/)
 [![OpenRouter](https://img.shields.io/badge/openrouter-free%20tier-6750A4.svg)](https://openrouter.ai/)
-[![CI](https://github.com/ShAuRyA-Noodle/Orange-Kid/actions/workflows/ci.yml/badge.svg)](https://github.com/ShAuRyA-Noodle/Orange-Kid/actions)
+[![CI](https://github.com/ShAuRyA-Noodle/echomind-commerce/actions/workflows/ci.yml/badge.svg)](https://github.com/ShAuRyA-Noodle/echomind-commerce/actions)
 
 [Quick start](#quick-start) · [Walkthrough](#walkthrough) · [Architecture](#architecture) · [API](#api-surface) · [Configuration](#configuration) · [Local development](#local-development)
 
@@ -45,7 +45,7 @@ After an audit, you walk away with:
 Prereqs: Docker Desktop, an existing Shopify Partner Dev Store, and free-tier API keys for Gemini and OpenRouter (both available without a credit card).
 
 ```bash
-git clone https://github.com/ShAuRyA-Noodle/Orange-Kid.git echomind-commerce
+git clone https://github.com/ShAuRyA-Noodle/echomind-commerce.git
 cd echomind-commerce
 
 cp .env.example .env

@@ -15,8 +15,8 @@ Thanks for your interest. This is a hackathon submission for Track 5 of the [KAS
 See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for full environment setup. Quick start:
 
 ```bash
-git clone https://github.com/ShAuRyA-Noodle/Orange-Kid.git
-cd Orange-Kid
+git clone https://github.com/ShAuRyA-Noodle/echomind-commerce.git
+cd echomind-commerce
 cp .env.example .env  # fill in keys
 docker compose up
 ```

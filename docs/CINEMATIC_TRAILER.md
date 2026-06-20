@@ -67,7 +67,7 @@ Resolution. The closed loop is the climax.
 | 1:10-1:14 | "Apply" click. Loading spinner. Cut to the live Shopify product page in a side-by-side: before / after. | "Real Shopify Admin GraphQL mutation." |
 | 1:14-1:21 | /audit re-test panel: surface rate animation 12% to 71%. The number counts up. | "Same buyer prompts. Same agents. 12% -> 71%." |
 | 1:21-1:25 | Screen splits into 4 quadrants showing: typed graph, four-agent simulation, gap deep-dive, before/after delta. | "Connect. Interview. Simulate. Diagnose. Fix. Re-test." |
-| 1:25-1:30 | Echomind logo. Tagline. URL. | "echomind. orange-kid. github.com/ShAuRyA-Noodle/Orange-Kid" |
+| 1:25-1:30 | Echomind logo. Tagline. URL. | "echomind. github.com/ShAuRyA-Noodle/echomind-commerce" |
 
 **Music**: Climactic resolution. Last beat lands on the URL frame.
 
