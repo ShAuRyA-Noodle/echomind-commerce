@@ -16,9 +16,10 @@ from typing import Any
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
+from api.ownership import ScopeContext, scope_ctx
 from core.diagnose.cypher_diff import find_all_candidates
 from core.diagnose.judge import classify_candidate
 from core.diagnose.ranker import GapRankingInputs, rank_gaps, split_for_ui
@@ -34,7 +35,10 @@ class DiagnoseRequest(BaseModel):
 
 
 @router.post("/run", summary="Find, classify, calibrate, rank gaps (real)")
-async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
+async def run_diagnose(
+    req: DiagnoseRequest | None = None,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Run the full diagnose pipeline.
 
     Steps (per WINNING_PLAN section 16.2):
@@ -54,12 +58,15 @@ async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
     classified = []
     for cand in flat_candidates:
         gap = await classify_candidate(cand, surface_loss_rate=surface_loss_rate)
-        await upsert_typed(gap, "Gap")
+        # Stamp owner_uid when auth is on so subsequent scoped reads find it.
+        await upsert_typed(gap, "Gap", scope=scope)
         # Tag with run id + timestamp so subsequent /api/diagnose/{run_id} calls
         # can filter; legacy gaps (no diagnose_run_id) still fall back to "latest".
+        # The owner predicate keeps cross-tenant Gaps untouched when auth is on.
         await neo4j_client.run(
-            "MATCH (g:Gap {id: $id}) SET g.diagnose_run_id = $rid, g.diagnose_run_at = $ts",
-            {"id": gap.id, "rid": run_id, "ts": started_at.isoformat()},
+            f"MATCH (g:Gap {{id: $id}}) WHERE {scope.predicate('g')} "
+            "SET g.diagnose_run_id = $rid, g.diagnose_run_at = $ts",
+            scope.params({"id": gap.id, "rid": run_id, "ts": started_at.isoformat()}),
         )
         classified.append(gap)
 
@@ -95,31 +102,36 @@ async def run_diagnose(req: DiagnoseRequest | None = None) -> dict[str, Any]:
 
 
 @router.get("/{diagnose_id}", summary="Gaps for a specific diagnose run (or latest if `_`/`latest`)")
-async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
+async def get_diagnose(
+    diagnose_id: str,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Return Gap nodes scoped to a diagnose run.
 
     Resolution order:
         - `diagnose_id` == "_" or "latest": pick most recent `diagnose_run_id`
           present on any Gap; if none have a run id (legacy), return all.
         - otherwise: filter by exact `diagnose_run_id`.
+
+    All reads are additionally scoped to the authenticated owner when auth is on.
     """
     resolved_id = diagnose_id
     if diagnose_id in {"_", "latest"}:
         latest = await neo4j_client.run(
-            """
-            MATCH (g:Gap) WHERE g.diagnose_run_id IS NOT NULL
+            f"""
+            MATCH (g:Gap) WHERE g.diagnose_run_id IS NOT NULL AND {scope.predicate("g")}
             RETURN g.diagnose_run_id AS rid, g.diagnose_run_at AS ts
             ORDER BY g.diagnose_run_at DESC
             LIMIT 1
             """,
-            {},
+            scope.params(),
         )
         resolved_id = latest[0]["rid"] if latest else None
 
     if resolved_id:
         rows = await neo4j_client.run(
-            """
-            MATCH (g:Gap) WHERE g.diagnose_run_id = $rid
+            f"""
+            MATCH (g:Gap) WHERE g.diagnose_run_id = $rid AND {scope.predicate("g")}
             RETURN g.id AS id, g.type AS type, g.severity AS severity,
                    g.calibration_label AS calibration_label,
                    coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact_usd_monthly,
@@ -129,13 +141,13 @@ async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
             ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
             LIMIT 50
             """,
-            {"rid": resolved_id},
+            scope.params({"rid": resolved_id}),
         )
     else:
         # Legacy fallback: no Gap has a run id yet (pre-migration data).
         rows = await neo4j_client.run(
-            """
-            MATCH (g:Gap)
+            f"""
+            MATCH (g:Gap) WHERE {scope.predicate("g")}
             RETURN g.id AS id, g.type AS type, g.severity AS severity,
                    g.calibration_label AS calibration_label,
                    coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact_usd_monthly,
@@ -145,7 +157,7 @@ async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
             ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
             LIMIT 50
             """,
-            {},
+            scope.params(),
         )
 
     gaps = [
@@ -175,19 +187,24 @@ async def get_diagnose(diagnose_id: str) -> dict[str, Any]:
     "/{diagnose_id}/gap/{gap_id}",
     summary="Single gap detail with full reasoning trace + source nodes",
 )
-async def get_gap(diagnose_id: str, gap_id: str) -> dict[str, Any]:
+async def get_gap(
+    diagnose_id: str,
+    gap_id: str,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Return a Gap node with its reasoning trace and all related source nodes.
 
     Fetches the Gap, its affected Products (with shopify_gid), the MerchantTruths
     that led to its detection, the AgentRepresentations that were involved, and
     any existing FixSuggestion. The frontend diff page builds its cinematic
-    reasoning-trace animation from this response.
+    reasoning-trace animation from this response. All reads are scoped to the
+    authenticated owner when auth is on.
     """
     logger.debug("gap.detail diagnose_id=%s gap_id=%s", diagnose_id, gap_id)
-    # 1. Fetch the Gap node
+    # 1. Fetch the Gap node (scoped: a cross-tenant gap_id reads as not_found)
     gap_rows = await neo4j_client.run(
-        "MATCH (g:Gap {id: $id}) RETURN g LIMIT 1",
-        {"id": gap_id},
+        f"MATCH (g:Gap {{id: $id}}) WHERE {scope.predicate('g')} RETURN g LIMIT 1",
+        scope.params({"id": gap_id}),
     )
     if not gap_rows:
         return {"status": "not_found", "gap_id": gap_id}
@@ -199,23 +216,23 @@ async def get_gap(diagnose_id: str, gap_id: str) -> dict[str, Any]:
     product_rows: list[dict[str, Any]] = []
     if affected_products:
         product_rows = await neo4j_client.run(
-            """
-            MATCH (p:Product) WHERE p.id IN $ids
+            f"""
+            MATCH (p:Product) WHERE p.id IN $ids AND {scope.predicate("p")}
             RETURN p.id AS id, p.title AS title,
                    p.shopify_gid AS shopify_gid,
                    p.description AS description
             LIMIT 10
             """,
-            {"ids": affected_products},
+            scope.params({"ids": affected_products}),
         )
 
     # 3. MerchantTruths related to affected products (via DESCRIBES edge)
     truth_rows: list[dict[str, Any]] = []
     if affected_products:
         truth_rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (m:MerchantTruth)-[:DESCRIBES]->(p:Product)
-            WHERE p.id IN $ids
+            WHERE p.id IN $ids AND {scope.predicate("m")} AND {scope.predicate("p")}
             RETURN m.id AS id, m.statement AS statement,
                    m.tacit_category AS tacit_category,
                    m.tacit_level AS tacit_level,
@@ -223,13 +240,14 @@ async def get_gap(diagnose_id: str, gap_id: str) -> dict[str, Any]:
                    p.id AS product_id
             LIMIT 10
             """,
-            {"ids": affected_products},
+            scope.params({"ids": affected_products}),
         )
     # Fallback: any MerchantTruths when edges not yet written
     if not truth_rows:
         truth_rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (m:MerchantTruth)
+            WHERE {scope.predicate("m")}
             RETURN m.id AS id, m.statement AS statement,
                    m.tacit_category AS tacit_category,
                    m.tacit_level AS tacit_level,
@@ -237,47 +255,48 @@ async def get_gap(diagnose_id: str, gap_id: str) -> dict[str, Any]:
                    null AS product_id
             LIMIT 5
             """,
-            {},
+            scope.params(),
         )
 
     # 4. AgentRepresentations that mention the affected products
     agent_rows: list[dict[str, Any]] = []
     if affected_products:
         agent_rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (a:AgentRepresentation)-[:MENTIONS]->(p:Product)
-            WHERE p.id IN $ids
+            WHERE p.id IN $ids AND {scope.predicate("a")} AND {scope.predicate("p")}
             RETURN a.id AS id, a.agent_model AS agent_model,
                    a.response_text AS response_text,
                    a.confidence_in_recommendation AS confidence,
                    p.id AS product_id
             LIMIT 20
             """,
-            {"ids": affected_products},
+            scope.params({"ids": affected_products}),
         )
     # Fallback: any AgentRepresentations when MENTIONS edges not yet written
     if not agent_rows:
         agent_rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (a:AgentRepresentation)
+            WHERE {scope.predicate("a")}
             RETURN a.id AS id, a.agent_model AS agent_model,
                    a.response_text AS response_text,
                    a.confidence_in_recommendation AS confidence,
                    null AS product_id
             LIMIT 10
             """,
-            {},
+            scope.params(),
         )
 
     # 5. Existing FixSuggestion for this gap (applied one preferred)
     fix_rows = await neo4j_client.run(
-        """
+        f"""
         MATCH (f:FixSuggestion)
-        WHERE f.gap_id = $gap_id
+        WHERE f.gap_id = $gap_id AND {scope.predicate("f")}
         RETURN f ORDER BY f.applied DESC
         LIMIT 1
         """,
-        {"gap_id": gap_id},
+        scope.params({"gap_id": gap_id}),
     )
     fix: dict[str, Any] | None = fix_rows[0]["f"] if fix_rows else None
 

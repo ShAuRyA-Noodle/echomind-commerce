@@ -5,40 +5,48 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from api.ownership import ScopeContext, scope_ctx
 from graph.neo4j_client import neo4j_client
 from graph.operations import graph_stats
 
 logger = logging.getLogger("echomind.api.audit")
 router = APIRouter(prefix="/audit", tags=["audit"])
 
+
 # Direct gap fetch - no HARMS edges required (they are written only when
 # fix is applied; gaps detected before fixes have no HARMS edges yet).
-GAPS_DIRECT = """
-MATCH (g:Gap)
-RETURN g.id AS gap_id,
-       g.type AS gap_type,
-       coalesce(g.severity, 0.5) AS severity,
-       coalesce(g.calibration_label, 'uncertain') AS calibration_label,
-       coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact,
-       coalesce(g.reasoning_chain, '') AS reasoning_chain,
-       coalesce(g.affected_products, []) AS affected_product_ids
-ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
-LIMIT 40
-"""
+# Built per-request so the owner predicate can be bound in when auth is on.
+def _gaps_direct_cypher(scope: ScopeContext) -> str:
+    return f"""
+    MATCH (g:Gap)
+    WHERE {scope.predicate("g")}
+    RETURN g.id AS gap_id,
+           g.type AS gap_type,
+           coalesce(g.severity, 0.5) AS severity,
+           coalesce(g.calibration_label, 'uncertain') AS calibration_label,
+           coalesce(g.revenue_impact_usd_monthly, 0.0) AS revenue_impact,
+           coalesce(g.reasoning_chain, '') AS reasoning_chain,
+           coalesce(g.affected_products, []) AS affected_product_ids
+    ORDER BY g.revenue_impact_usd_monthly DESC, g.severity DESC
+    LIMIT 40
+    """
 
 
 @router.get("/{store_id}", summary="Audit dashboard summary (live Neo4j read)")
-async def get_audit(store_id: str) -> dict[str, Any]:
-    stats = await graph_stats()
+async def get_audit(
+    store_id: str,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
+    stats = await graph_stats(scope)
     nodes = stats.get("nodes", {})
     products = nodes.get("Product", 0)
     truths = nodes.get("MerchantTruth", 0)
     agent_reps = nodes.get("AgentRepresentation", 0)
     gaps = nodes.get("Gap", 0)
     fixes = nodes.get("FixSuggestion", 0)
-    calibration_mix = await _calibration_distribution()
+    calibration_mix = await _calibration_distribution(scope)
     readiness_score = max(0, min(100,
         70 + min(20, products // 2) + min(10, truths) - max(0, gaps * 2) + min(10, fixes)
     ))
@@ -59,8 +67,11 @@ async def get_audit(store_id: str) -> dict[str, Any]:
 
 
 @router.get("/{store_id}/gaps", summary="Ranked gap list (direct, no HARMS edges required)")
-async def get_audit_gaps(store_id: str) -> dict[str, Any]:
-    rows = await neo4j_client.run(GAPS_DIRECT, {})
+async def get_audit_gaps(
+    store_id: str,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
+    rows = await neo4j_client.run(_gaps_direct_cypher(scope), scope.params())
     # Shape rows to match frontend ApiGap interface
     gaps = [
         {
@@ -81,16 +92,21 @@ async def get_audit_gaps(store_id: str) -> dict[str, Any]:
 
 
 @router.get("/{store_id}/timeline", summary="Chronological swarm event timeline for replay")
-async def get_timeline(store_id: str) -> dict[str, Any]:
+async def get_timeline(
+    store_id: str,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Return all agent responses, detected gaps, and applied fixes in time order.
 
     Used by the /replay page to build its timeline scrubber and event log.
+    Scoped to the authenticated owner when auth is enabled.
     """
     logger.debug("audit.timeline store_id=%s", store_id)
     agent_rows = await neo4j_client.run(
-        """
+        f"""
         MATCH (a:AgentRepresentation)
-        OPTIONAL MATCH (b:BuyerPrompt {id: a.buyer_prompt_id})
+        WHERE {scope.predicate("a")}
+        OPTIONAL MATCH (b:BuyerPrompt {{id: a.buyer_prompt_id}})
         RETURN a.id AS id,
                a.agent_model AS agent_model,
                a.response_text AS response_text,
@@ -102,11 +118,13 @@ async def get_timeline(store_id: str) -> dict[str, Any]:
         ORDER BY a.captured_at ASC
         LIMIT 100
         """,
+        scope.params(),
     )
 
     gap_rows = await neo4j_client.run(
-        """
+        f"""
         MATCH (g:Gap)
+        WHERE {scope.predicate("g")}
         RETURN g.id AS id, g.type AS type,
                coalesce(g.severity, 0.5) AS severity,
                coalesce(g.calibration_label, 'uncertain') AS calibration_label,
@@ -115,18 +133,20 @@ async def get_timeline(store_id: str) -> dict[str, Any]:
         ORDER BY g.severity DESC
         LIMIT 20
         """,
+        scope.params(),
     )
 
     fix_rows = await neo4j_client.run(
-        """
+        f"""
         MATCH (f:FixSuggestion)
-        WHERE f.applied = true
+        WHERE f.applied = true AND {scope.predicate("f")}
         RETURN f.id AS id, f.gap_id AS gap_id, f.fix_type AS fix_type,
                f.applied_at AS applied_at, f.shopify_resource_id AS shopify_resource_id,
                f.proposed_text AS proposed_text
         ORDER BY f.applied_at ASC
         LIMIT 20
         """,
+        scope.params(),
     )
 
     events = [
@@ -182,12 +202,17 @@ async def get_timeline(store_id: str) -> dict[str, Any]:
 
 
 @router.get("/{store_id}/decisions", summary="Decision nodes for policy decision tree")
-async def get_decisions(store_id: str, type: str | None = None) -> dict[str, Any]:
+async def get_decisions(
+    store_id: str,
+    type: str | None = None,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Return Decision nodes for the policy/decision-tree page.
 
     Optional `type` query param filters server-side by substring match against
     question/context/outcome (case-insensitive). `type` values like
     "returns"/"shipping"/"warranty" map naturally; "all" or omitted = no filter.
+    Scoped to the authenticated owner when auth is enabled.
     """
     logger.debug("audit.decisions store_id=%s type=%s", store_id, type)
     needle = (type or "").replace("-", " ").strip().lower()
@@ -195,11 +220,12 @@ async def get_decisions(store_id: str, type: str | None = None) -> dict[str, Any
 
     if apply_filter:
         rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (d:Decision)
-            WHERE toLower(coalesce(d.question, ''))  CONTAINS $needle
+            WHERE ({scope.predicate("d")})
+              AND (toLower(coalesce(d.question, ''))  CONTAINS $needle
                OR toLower(coalesce(d.context, ''))   CONTAINS $needle
-               OR toLower(coalesce(d.outcome, ''))   CONTAINS $needle
+               OR toLower(coalesce(d.outcome, ''))   CONTAINS $needle)
             RETURN d.id AS id, d.question AS question, d.context AS context,
                    d.outcome AS outcome,
                    coalesce(d.conditions, []) AS conditions,
@@ -208,12 +234,13 @@ async def get_decisions(store_id: str, type: str | None = None) -> dict[str, Any
             ORDER BY d.confidence DESC
             LIMIT 40
             """,
-            {"needle": needle},
+            scope.params({"needle": needle}),
         )
     else:
         rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (d:Decision)
+            WHERE {scope.predicate("d")}
             RETURN d.id AS id, d.question AS question, d.context AS context,
                    d.outcome AS outcome,
                    coalesce(d.conditions, []) AS conditions,
@@ -222,6 +249,7 @@ async def get_decisions(store_id: str, type: str | None = None) -> dict[str, Any
             ORDER BY d.confidence DESC
             LIMIT 40
             """,
+            scope.params(),
         )
 
     decisions = [
@@ -246,8 +274,10 @@ async def get_decisions(store_id: str, type: str | None = None) -> dict[str, Any
     }
 
 
-async def _calibration_distribution() -> dict[str, int]:
+async def _calibration_distribution(scope: ScopeContext) -> dict[str, int]:
     rows = await neo4j_client.run(
-        "MATCH (g:Gap) WITH coalesce(g.calibration_label,'uncertain') AS label, count(*) AS c RETURN label, c"
+        f"MATCH (g:Gap) WHERE {scope.predicate('g')} "
+        "WITH coalesce(g.calibration_label,'uncertain') AS label, count(*) AS c RETURN label, c",
+        scope.params(),
     )
     return {row["label"]: row["c"] for row in rows}

@@ -9,7 +9,32 @@
 
 import { z, type ZodSchema } from "zod";
 
+import { firebaseAuth, isFirebaseConfigured } from "@/lib/firebase";
+
 const BASE_URL: string = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+
+/**
+ * Resolve the current user's Firebase ID token, if any.
+ *
+ * Returns null (and never throws) in the open demo: when Firebase is not
+ * configured (no NEXT_PUBLIC_FIREBASE_* env), or when no user is signed in.
+ * Only when a real user exists do we attach a bearer token, so the backend's
+ * per-owner scoping (which activates with AUTH_REQUIRED=true) receives the uid.
+ * The demo - no Firebase config, no user - sends no Authorization header, so
+ * behaviour is identical to before this wiring.
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    if (typeof window === "undefined") return null; // server render: no client user
+    if (!isFirebaseConfigured()) return null;
+    const user = firebaseAuth.currentUser;
+    if (!user) return null;
+    return await user.getIdToken();
+  } catch {
+    // Auth must never break a request in demo mode; fall back to anonymous.
+    return null;
+  }
+}
 
 export class ApiError extends Error {
   public readonly status: number;
@@ -45,10 +70,18 @@ function buildUrl(path: string, query?: RequestOptions<unknown>["query"]): strin
 
 export async function request<TResponse>(opts: RequestOptions<TResponse>): Promise<TResponse> {
   const { method = "GET", path, body, query, schema, signal, headers } = opts;
+
+  // Attach the Firebase ID token when a user is signed in (no-op in the demo).
+  // An explicit Authorization in `headers` always wins.
+  const authHeaders: Record<string, string> = {};
+  const token = await getAuthToken();
+  if (token) authHeaders["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(buildUrl(path, query), {
     method,
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders,
       ...headers,
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,

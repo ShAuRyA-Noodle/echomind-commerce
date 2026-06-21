@@ -66,13 +66,21 @@ async def upsert_product_typed(p: Any) -> str:
     return p.id
 
 
-async def upsert_typed(node: Any, label: str) -> str:
-    """Generic typed upsert: takes a pydantic model + label, MERGEs by id."""
+async def upsert_typed(node: Any, label: str, scope: Any | None = None) -> str:
+    """Generic typed upsert: takes a pydantic model + label, MERGEs by id.
+
+    `scope` is an optional `api.ownership.ScopeContext`. When supplied and
+    active, the written node is stamped with `owner_uid` so subsequent scoped
+    reads can find it. When omitted or inactive no owner stamp is added, so the
+    open-demo graph is unchanged and existing callers need no edits.
+    """
     cypher = (
         f"MERGE (n:{label} {{id: $id}}) SET n += $props RETURN n.id AS id"
     )
     props = node.model_dump() if hasattr(node, "model_dump") else dict(node)
     nid = props.pop("id", None)
+    if scope is not None and hasattr(scope, "stamp"):
+        props = scope.stamp(props)
     await neo4j_client.run(cypher, {"id": nid, "props": props})
     return nid
 
@@ -95,12 +103,33 @@ async def upsert_edge_typed(
     )
 
 
-async def graph_stats() -> dict[str, Any]:
-    """Per-type node + edge counts for the audit dashboard."""
+async def graph_stats(scope: Any | None = None) -> dict[str, Any]:
+    """Per-type node + edge counts for the audit dashboard.
+
+    `scope` is an optional `api.ownership.ScopeContext`. When supplied and
+    active, node + edge counts are scoped to the authenticated owner; when
+    omitted or inactive the counts are global (the open-demo default), so
+    existing callers that pass nothing are unchanged.
+    """
     from . import queries as Q
 
-    nodes = await neo4j_client.run(Q.GRAPH_NODE_COUNTS, {})
-    edges = await neo4j_client.run(Q.GRAPH_EDGE_COUNTS, {})
+    if scope is not None and getattr(scope, "active", False):
+        nodes_cy = (
+            f"MATCH (n) WHERE {scope.predicate('n')} "
+            "WITH labels(n)[0] AS label, count(*) AS c "
+            "RETURN label, c ORDER BY label"
+        )
+        edges_cy = (
+            f"MATCH (a)-[r]->(b) WHERE {scope.predicate('a')} AND {scope.predicate('b')} "
+            "WITH type(r) AS rel, count(*) AS c "
+            "RETURN rel, c ORDER BY rel"
+        )
+        params = scope.params()
+        nodes = await neo4j_client.run(nodes_cy, params)
+        edges = await neo4j_client.run(edges_cy, params)
+    else:
+        nodes = await neo4j_client.run(Q.GRAPH_NODE_COUNTS, {})
+        edges = await neo4j_client.run(Q.GRAPH_EDGE_COUNTS, {})
     return {
         "nodes": {row["label"]: row["c"] for row in nodes if row.get("label")},
         "edges": {row["rel"]: row["c"] for row in edges if row.get("rel")},

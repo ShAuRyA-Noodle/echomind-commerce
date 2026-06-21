@@ -188,6 +188,8 @@ All endpoints live under `/api`. WebSockets carry live state; REST handles one-s
 
 OpenAPI is auto-generated; once the backend is running, browse the live spec at `http://localhost:8000/docs`.
 
+> **Auth & multi-tenant scoping.** The public demo runs with `AUTH_REQUIRED=false`, so these routes are open and the `{store_id}` segment is informational. The graph/audit/diagnose/fix reads and `/fix/apply` carry a server-side owner-scoping layer (`backend/api/ownership.py`) that activates automatically when a Firebase token is present: reads bind the owner's `uid` into Cypher, writes stamp `owner_uid`, and `/fix/apply` rejects cross-tenant mutations. **For a shared multi-tenant deployment, set `AUTH_REQUIRED=true` and gate the frontend behind sign-in** (the REST client already attaches the ID token when Firebase is configured). See [SECURITY.md §2.1](SECURITY.md#21-production-multi-tenant-checklist-required-before-a-shared-deployment) for the full production checklist.
+
 ## Configuration
 
 Every setting is a typed environment variable. Defaults work for local dev. See [`.env.example`](.env.example) for the complete schema and source URLs.

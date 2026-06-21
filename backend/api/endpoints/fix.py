@@ -13,9 +13,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
+from api.ownership import ScopeContext, scope_ctx
 from api.schemas import AgentRepresentation, FixSuggestion, Gap
 from config.prompts import AGENT_SIMULATOR_SYSTEM_PROMPT
 from core.agents.runner import BuyerPromptInput, run_swarm
@@ -47,8 +48,24 @@ class ApplyFixFullRequest(BaseModel):
 
 
 @router.post("/generate/{gap_id}", summary="Generate FixSuggestion for a Gap (Gemini Pro)")
-async def generate_fix_endpoint(gap_id: str, req: GenerateFixRequest) -> dict[str, Any]:
-    """Build a fix using the 4-strategy subgraph + merchant voice samples."""
+async def generate_fix_endpoint(
+    gap_id: str,
+    req: GenerateFixRequest,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
+    """Build a fix using the 4-strategy subgraph + merchant voice samples.
+
+    When auth is on the gap must belong to the caller, and the new
+    FixSuggestion is stamped with the owner so it scopes on later reads/applies.
+    """
+    # Ownership gate: the Gap this fix targets must be the caller's (when auth on).
+    if scope.active:
+        gap_rows = await neo4j_client.run(
+            "MATCH (g:Gap {id: $id}) RETURN g LIMIT 1",
+            {"id": gap_id},
+        )
+        scope.require_owns(gap_rows[0]["g"] if gap_rows else None, kind="gap")
+
     gap = Gap(
         id=gap_id,
         type=req.fix_type or "omission",  # type: ignore[arg-type]
@@ -63,23 +80,74 @@ async def generate_fix_endpoint(gap_id: str, req: GenerateFixRequest) -> dict[st
         subgraph_contradictions=req.subgraph_contradictions,
         merchant_voice_samples=req.merchant_voice_samples,
     )
-    await upsert_typed(fix, "FixSuggestion")
+    await upsert_typed(fix, "FixSuggestion", scope=scope)
     return _serialize_fix(fix)
 
 
 @router.post("/apply", summary="Apply hydrated FixSuggestion to Shopify (real mutation)")
-async def apply_fix_full(req: ApplyFixFullRequest) -> dict[str, Any]:
+async def apply_fix_full(
+    req: ApplyFixFullRequest,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Push the fix to Shopify Admin GraphQL.
 
     Caller hands the FixSuggestion (queried from Neo4j) plus the target gid.
+
+    Authorization (defense-in-depth): when auth is enabled this mutation is
+    gated on ownership. The caller supplies the FixSuggestion in the body, so we
+    do NOT trust it - we re-fetch the persisted FixSuggestion (and, when given,
+    the target Product) from Neo4j by id/gid and confirm the authenticated owner
+    owns them before touching Shopify. A cross-tenant fix/target is rejected with
+    403; an unknown one with 404. No-op when auth is off (open demo unchanged).
     """
+    if scope.active:
+        await _authorize_apply(req, scope)
+
     applied = await apply_fix(
         req.fix,
         target_product_gid=req.target_product_gid,
         target_page_gid=req.target_page_gid,
     )
-    await upsert_typed(applied, "FixSuggestion")
+    await upsert_typed(applied, "FixSuggestion", scope=scope)
     return _serialize_fix(applied)
+
+
+async def _authorize_apply(req: ApplyFixFullRequest, scope: ScopeContext) -> None:
+    """Confirm the caller owns the FixSuggestion and/or target Product.
+
+    Server-side re-fetch by id/gid (never trusting body-supplied owner data).
+    Raises 403/404 via `scope.require_owns` on a cross-tenant or unknown
+    resource. If neither the fix node nor the target product exists yet (e.g. a
+    freshly generated fix not yet persisted), the apply is allowed - there is no
+    other tenant's resource being mutated.
+    """
+    checked_any = False
+
+    fix_id = getattr(req.fix, "id", None)
+    if fix_id:
+        fix_rows = await neo4j_client.run(
+            "MATCH (f:FixSuggestion {id: $id}) RETURN f LIMIT 1",
+            {"id": fix_id},
+        )
+        if fix_rows:
+            scope.require_owns(fix_rows[0]["f"], kind="fix")
+            checked_any = True
+
+    if req.target_product_gid:
+        prod_rows = await neo4j_client.run(
+            "MATCH (p:Product {shopify_gid: $gid}) RETURN p LIMIT 1",
+            {"gid": req.target_product_gid},
+        )
+        if prod_rows:
+            scope.require_owns(prod_rows[0]["p"], kind="product")
+            checked_any = True
+
+    if not checked_any:
+        logger.info(
+            "fix.apply.no_persisted_resource fix_id=%s gid=%s - allowing (nothing owned to violate)",
+            fix_id,
+            req.target_product_gid,
+        )
 
 
 class RetestRequest(BaseModel):
@@ -89,17 +157,24 @@ class RetestRequest(BaseModel):
 
 
 @router.post("/retest/{fix_id}", summary="Rerun swarm + measure observed delta (real)")
-async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str, Any]:
+async def retest_fix(
+    fix_id: str,
+    req: RetestRequest | None = None,
+    scope: ScopeContext = Depends(scope_ctx),
+) -> dict[str, Any]:
     """Rerun the swarm against the buyer prompts that previously surfaced this gap,
     compute the before/after surface-rate delta, and persist `observed_delta`
     onto the FixSuggestion node. Closes the detect → fix → re-test → measure loop.
+
+    The FixSuggestion (and its Gap) are scoped to the authenticated owner when
+    auth is on, so a caller cannot retest another tenant's fix.
     """
     cfg = req or RetestRequest()
 
-    # 1. Fetch FixSuggestion + Gap
+    # 1. Fetch FixSuggestion + Gap (scoped: cross-tenant ids read as not_found)
     fix_rows = await neo4j_client.run(
-        "MATCH (f:FixSuggestion {id: $id}) RETURN f LIMIT 1",
-        {"id": fix_id},
+        f"MATCH (f:FixSuggestion {{id: $id}}) WHERE {scope.predicate('f')} RETURN f LIMIT 1",
+        scope.params({"id": fix_id}),
     )
     if not fix_rows:
         return {"status": "not_found", "fix_id": fix_id}
@@ -107,8 +182,8 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
     gap_id = f.get("gap_id")
 
     gap_rows = await neo4j_client.run(
-        "MATCH (g:Gap {id: $id}) RETURN g LIMIT 1",
-        {"id": gap_id},
+        f"MATCH (g:Gap {{id: $id}}) WHERE {scope.predicate('g')} RETURN g LIMIT 1",
+        scope.params({"id": gap_id}),
     )
     if not gap_rows:
         return {"status": "gap_not_found", "fix_id": fix_id, "gap_id": gap_id}
@@ -120,11 +195,11 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
     description_rows = []
     if affected_products:
         title_rows = await neo4j_client.run(
-            """
-            MATCH (p:Product) WHERE p.id IN $ids
+            f"""
+            MATCH (p:Product) WHERE p.id IN $ids AND {scope.predicate("p")}
             RETURN p.id AS id, p.title AS title, p.description AS description
             """,
-            {"ids": affected_products},
+            scope.params({"ids": affected_products}),
         )
         description_rows = title_rows
     target_titles = [r["title"] for r in title_rows if r.get("title")]
@@ -136,10 +211,10 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
     hist_rows = []
     if affected_products:
         hist_rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (a:AgentRepresentation)-[:MENTIONS]->(p:Product)
-            WHERE p.id IN $ids
-            OPTIONAL MATCH (b:BuyerPrompt {id: a.buyer_prompt_id})
+            WHERE p.id IN $ids AND {scope.predicate("a")} AND {scope.predicate("p")}
+            OPTIONAL MATCH (b:BuyerPrompt {{id: a.buyer_prompt_id}})
             RETURN a.id AS rep_id, a.agent_model AS agent_model,
                    a.response_text AS response_text,
                    coalesce(a.surfaced_products, []) AS surfaced_products,
@@ -147,15 +222,16 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
                    b.prompt_text AS prompt_text
             LIMIT 60
             """,
-            {"ids": affected_products},
+            scope.params({"ids": affected_products}),
         )
     if not hist_rows and target_titles:
         # surfaced_products substring match (no edge required)
         hist_rows = await neo4j_client.run(
-            """
+            f"""
             MATCH (a:AgentRepresentation)
-            WHERE any(t IN a.surfaced_products WHERE toLower(t) IN $titles_lower)
-            OPTIONAL MATCH (b:BuyerPrompt {id: a.buyer_prompt_id})
+            WHERE ({scope.predicate("a")})
+              AND any(t IN a.surfaced_products WHERE toLower(t) IN $titles_lower)
+            OPTIONAL MATCH (b:BuyerPrompt {{id: a.buyer_prompt_id}})
             RETURN a.id AS rep_id, a.agent_model AS agent_model,
                    a.response_text AS response_text,
                    coalesce(a.surfaced_products, []) AS surfaced_products,
@@ -163,7 +239,7 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
                    b.prompt_text AS prompt_text
             LIMIT 60
             """,
-            {"titles_lower": [t.lower() for t in target_titles]},
+            scope.params({"titles_lower": [t.lower() for t in target_titles]}),
         )
 
     before_reps: list[AgentRepresentation] = []
@@ -218,9 +294,9 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
         demo_mode=cfg.demo_mode,
     )
 
-    # Persist the new representations so /replay reflects them
+    # Persist the new representations so /replay reflects them (owner-stamped)
     for rep in after_reps:
-        await upsert_typed(rep, "AgentRepresentation")
+        await upsert_typed(rep, "AgentRepresentation", scope=scope)
 
     # 6. Measure delta
     fix_obj = FixSuggestion(
@@ -243,23 +319,24 @@ async def retest_fix(fix_id: str, req: RetestRequest | None = None) -> dict[str,
         target_product_titles=target_titles or [pid for pid in affected_products],
     )
 
-    # 7. Persist observed_delta back onto the FixSuggestion
+    # 7. Persist observed_delta back onto the FixSuggestion (owner-scoped write)
     await neo4j_client.run(
-        """
-        MATCH (f:FixSuggestion {id: $id})
+        f"""
+        MATCH (f:FixSuggestion {{id: $id}})
+        WHERE {scope.predicate("f")}
         SET f.observed_delta = $delta_pp,
             f.observed_before_rate = $before_rate,
             f.observed_after_rate = $after_rate,
             f.retested_at = $ts
         RETURN f.id AS id
         """,
-        {
+        scope.params({
             "id": fix_id,
             "delta_pp": float(delta.delta_pp),
             "before_rate": float(delta.before_surface_rate),
             "after_rate": float(delta.after_surface_rate),
             "ts": _utcnow_iso(),
-        },
+        }),
     )
 
     return {

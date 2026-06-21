@@ -25,8 +25,19 @@
 - **Authentication.** Firebase Auth with Google Sign-In is the only identity model. Sessions are short-lived (1 hour) and refreshed via Firebase's standard refresh-token flow.
 - **Backend trust boundary.** Every authenticated request from the frontend carries a Firebase ID token; the FastAPI middleware verifies the token via the Firebase Admin SDK before any route handler runs.
 - **Shopify token storage.** The merchant's Admin API access token is stored in Firestore under a per-merchant document, encrypted at rest by Google's default Firestore encryption. It is never exposed to the frontend and is read only when an audit-pipeline service needs it server-side.
-- **No multi-tenant data sharing.** The MVP is single-merchant per session; the data model carries explicit merchant scoping on every node.
+- **Single-tenant demo, multi-tenant-ready scoping.** The public demo runs single-merchant with `AUTH_REQUIRED=false`, so the frontend sends no token and every graph node is globally visible *within that one demo store*. The graph/audit/diagnose/fix read paths and the `/fix/apply` mutation carry a server-side owner-scoping layer (`backend/api/ownership.py`) that **activates automatically when auth is present**: each read binds the authenticated owner's `uid` into the Cypher (`owner_uid = $owner_uid OR owner_uid IS NULL`), writes stamp `owner_uid` onto new nodes, and `/fix/apply` re-fetches the target server-side and rejects cross-tenant mutations (403). When auth is off the predicate degrades to `true` and nothing is stamped, so the open demo is unaffected.
 - **Firestore security rules.** Test mode during development; **tightened to per-merchant + auth-required rules before submission** (Decision Log #23). The submission checklist gates this.
+
+### 2.1 Production multi-tenant checklist (REQUIRED before a shared deployment)
+
+The owner-scoping infrastructure is defense-in-depth and is *inert by configuration* in the demo. Before serving more than one merchant from one backend, all of the following MUST be enabled - this is a deploy/product decision, intentionally not forced in code so the public demo keeps working:
+
+1. **`AUTH_REQUIRED=true`** on the backend. This makes `FirebaseAuthMiddleware` + `require_user` reject unauthenticated `/api/*` calls and makes `ScopeContext.active` true, which turns on the Cypher owner predicates and write stamping.
+2. **Firebase-token frontend wiring.** The REST client (`frontend/lib/api-client.ts`) already attaches `Authorization: Bearer <idToken>` whenever Firebase is configured and a user is signed in (no-op otherwise). Production must therefore (a) set the `NEXT_PUBLIC_FIREBASE_*` env vars and (b) gate the app behind a real sign-in so `firebaseAuth.currentUser` is populated. The WebSocket paths (`/api/interview/ws`, `/api/simulate/ws`) must likewise pass the token via the `?token=` query param or the `bearer, <token>` subprotocol (see `verify_ws_token`).
+3. **Backfill legacy nodes.** The read predicate intentionally keeps pre-scoping nodes (no `owner_uid`) visible to every authenticated owner so enabling auth does not blank an existing single-tenant graph. For hard isolation, run a one-time backfill that stamps `owner_uid` on every existing node and then drop the `OR owner_uid IS NULL` arm of the predicate in `ownership.py`.
+4. **Per-tenant Firestore rules + rate limits** (see §2 above and §7).
+
+Until step 1 and step 2 are both live, treat the deployment as single-tenant: the scoping code is present and tested but, by design, does nothing while auth is disabled.
 
 ## 3. Data lifecycle & merchant control
 
