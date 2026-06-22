@@ -2,7 +2,7 @@
 # Python 3.11+
 
 fastapi>=0.115,<0.139
-uvicorn[standard]==0.30.*
+uvicorn[standard]>=0.30,<0.50
 websockets==13.*
 pydantic==2.9.*
 pydantic-settings>=2.5,<2.15
