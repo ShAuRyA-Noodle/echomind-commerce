@@ -100,8 +100,8 @@ async def run_public_audit(req: PublicAuditRequest) -> dict[str, Any]:
             api_version=req.api_version,
             product_limit=req.product_limit,
         )
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("public_audit.fetch_failed exc=%r", exc)
+    except Exception as exc:
+        logger.exception("public_audit.fetch_failed")
         # Do not echo the raw exception back to an unauthenticated caller; it can
         # leak internal/Shopify error detail. Keep specifics in server logs only.
         raise HTTPException(

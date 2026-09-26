@@ -12,9 +12,8 @@ Endpoints
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from typing import Any
-
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -48,7 +47,7 @@ async def run_diagnose(
         4. Rank by gap_priority, split into 4 UI buckets
     """
     surface_loss_rate = req.surface_loss_rate if req else 0.5
-    started_at = datetime.now(timezone.utc)
+    started_at = datetime.now(UTC)
     run_id = deterministic_id("drun", started_at.isoformat(), str(surface_loss_rate))
 
     candidates = await find_all_candidates()

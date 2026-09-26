@@ -43,8 +43,8 @@ def generate_buyer_prompts(
     raw = ""
     try:
         raw = llm_service.gemini_flash(prompt_text, temperature=0.85)
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("prompt_gen.failed exc=%r", exc)
+    except Exception:
+        logger.exception("prompt_gen.failed")
         return []
 
     parsed = safe_json_loads(raw)

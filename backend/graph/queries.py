@@ -20,7 +20,6 @@ from __future__ import annotations
 
 from typing import Final
 
-
 # ---------------------------------------------------------------------------
 # INGEST - Shopify → Neo4j writes (idempotent MERGE on `id`)
 # ---------------------------------------------------------------------------
@@ -395,41 +394,41 @@ def get(name: str) -> str:
 
 
 __all__ = [
-    # ingest
-    "UPSERT_PRODUCT",
-    "UPSERT_POLICY",
-    "UPSERT_TRUST_SIGNAL",
-    # interview
-    "UPSERT_MERCHANT_TRUTH",
-    "UPSERT_DECISION",
-    "UPSERT_PATTERN",
-    "UPSERT_CUSTOMER_QUESTION",
-    # swarm
-    "UPSERT_BUYER_PROMPT",
-    "UPSERT_AGENT_REPRESENTATION",
-    "UPSERT_GAP",
-    "UPSERT_FIX_SUGGESTION",
-    "UPSERT_EDGE_TEMPLATE",
+    "CANDIDATE_AMBIGUITY",
+    "CANDIDATE_CONTRADICTION",
+    "CANDIDATE_DARK_ZONE",
+    "CANDIDATE_HALLUCINATION",
     # gap detect
     "CANDIDATE_OMISSION",
-    "CANDIDATE_CONTRADICTION",
-    "CANDIDATE_AMBIGUITY",
-    "CANDIDATE_HALLUCINATION",
-    "CANDIDATE_DARK_ZONE",
-    # subgraph
-    "SUBGRAPH_DIRECT_2HOP",
-    "SUBGRAPH_DECISIONS",
-    "SUBGRAPH_CONTRADICTIONS",
+    "GAPS_WITH_AFFECTED_PRODUCTS",
+    "GRAPH_EDGE_COUNTS",
     # stats
     "GRAPH_NODE_COUNTS",
-    "GRAPH_EDGE_COUNTS",
-    "SHOPIFY_INGEST_SUMMARY",
-    # legacy (back-compat)
-    "QUERIES",
-    "get",
     "NODE_COUNTS_BY_LABEL",
     "PRODUCTS_WITHOUT_MERCHANT_TRUTH",
-    "TOP_FRONTIER_MERCHANT_TRUTHS",
+    # legacy (back-compat)
+    "QUERIES",
+    "SHOPIFY_INGEST_SUMMARY",
     "SIMILAR_MERCHANT_TRUTHS_BY_VECTOR",
-    "GAPS_WITH_AFFECTED_PRODUCTS",
+    "SUBGRAPH_CONTRADICTIONS",
+    "SUBGRAPH_DECISIONS",
+    # subgraph
+    "SUBGRAPH_DIRECT_2HOP",
+    "TOP_FRONTIER_MERCHANT_TRUTHS",
+    "UPSERT_AGENT_REPRESENTATION",
+    # swarm
+    "UPSERT_BUYER_PROMPT",
+    "UPSERT_CUSTOMER_QUESTION",
+    "UPSERT_DECISION",
+    "UPSERT_EDGE_TEMPLATE",
+    "UPSERT_FIX_SUGGESTION",
+    "UPSERT_GAP",
+    # interview
+    "UPSERT_MERCHANT_TRUTH",
+    "UPSERT_PATTERN",
+    "UPSERT_POLICY",
+    # ingest
+    "UPSERT_PRODUCT",
+    "UPSERT_TRUST_SIGNAL",
+    "get",
 ]

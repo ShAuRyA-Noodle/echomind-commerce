@@ -8,7 +8,7 @@ configuration documented in WINNING_PLAN §5.3 / §23.1.
 from __future__ import annotations
 
 import logging
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 logger = logging.getLogger("echomind.stt")
 
@@ -42,7 +42,7 @@ class STTService:
 
     async def close(self) -> None:
         """Release any active streaming connection."""
-        return None
+        return
 
 
 stt_service = STTService()

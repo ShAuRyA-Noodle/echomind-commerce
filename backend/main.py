@@ -20,8 +20,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any
 
 from fastapi import APIRouter, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -72,12 +73,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     try:
         await neo4j_client.connect()
         logger.info("startup.neo4j.ok")
-    except Exception:  # noqa: BLE001
+    except Exception:
         logger.exception("startup.neo4j.failed - backend will run degraded")
     try:
         firebase_service.initialize()
         logger.info("startup.firebase.attempted")
-    except Exception:  # noqa: BLE001
+    except Exception:
         logger.exception("startup.firebase.failed - backend will run degraded")
     logger.info("startup.complete")
     try:
@@ -86,11 +87,11 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         logger.info("shutdown.begin")
         try:
             await neo4j_client.close()
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.exception("shutdown.neo4j.failed")
         try:
             firebase_service.shutdown()
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.exception("shutdown.firebase.failed")
         logger.info("shutdown.complete")
 
@@ -219,8 +220,8 @@ async def interview_ws(websocket: WebSocket, session_id: str) -> None:
     async def send(event: dict[str, Any]) -> None:
         try:
             await websocket.send_json(event)
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception:
+            logger.debug("interview.ws.send_failed", exc_info=True)
 
     async def emit_progress() -> None:
         elapsed_min = (asyncio.get_event_loop().time() - started_at) / 60.0
@@ -379,12 +380,12 @@ async def interview_ws(websocket: WebSocket, session_id: str) -> None:
 
     except WebSocketDisconnect:
         logger.info("interview.ws.disconnected session_id=%s", safe_log(session_id))
-    except Exception:  # noqa: BLE001
+    except Exception:
         logger.exception("interview.ws.error session_id=%s", safe_log(session_id))
         try:
             await websocket.close(code=1011)
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception:
+            logger.debug("interview.ws.close_failed", exc_info=True)
 
 
 # ---------------------------------------------------------------------------
@@ -457,8 +458,8 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
                     await websocket.send_json(
                         {"type": "run_progress", "completed": completed["n"], "total": total}
                     )
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception:
+                logger.debug("simulate.ws.send_failed", exc_info=True)
 
         representations = await run_swarm(
             buyer_prompts=runner_input,
@@ -482,13 +483,13 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
 
     except WebSocketDisconnect:
         logger.info("simulate.ws.disconnected run_id=%s", safe_log(run_id))
-    except Exception:  # noqa: BLE001
+    except Exception:
         logger.exception("simulate.ws.error run_id=%s", safe_log(run_id))
         try:
             await websocket.send_json({"type": "error", "message": "internal_error"})
             await websocket.close(code=1011)
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception:
+            logger.debug("simulate.ws.close_failed", exc_info=True)
 
 
 # ---------------------------------------------------------------------------

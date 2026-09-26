@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from .neo4j_client import Neo4jClient, neo4j_client
@@ -41,7 +41,7 @@ def deterministic_id(prefix: str, *parts: str) -> str:
 
 
 def utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 async def upsert_product_typed(p: Any) -> str:
@@ -60,7 +60,7 @@ async def upsert_product_typed(p: Any) -> str:
             "image_urls": getattr(p, "image_urls", []),
             "tags": getattr(p, "tags", []),
             "variants_summary": getattr(p, "variants_summary", None),
-            "ingested_at": (getattr(p, "ingested_at", None) or datetime.now(timezone.utc)).isoformat(),
+            "ingested_at": (getattr(p, "ingested_at", None) or datetime.now(UTC)).isoformat(),
         },
     )
     return p.id

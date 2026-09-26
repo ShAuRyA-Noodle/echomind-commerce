@@ -31,7 +31,7 @@ def _decode(token: str) -> dict[str, Any] | None:
         return None
     try:
         return firebase_service.verify_id_token(token)
-    except Exception:
+    except Exception:  # noqa: BLE001 - reject any token verification failure
         logger.warning("auth.verify.failed")
         return None
 

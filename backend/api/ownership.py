@@ -76,7 +76,7 @@ class ScopeContext:
     False every method degrades to a no-op so the open demo is unaffected.
     """
 
-    __slots__ = ("owner_uid", "active")
+    __slots__ = ("active", "owner_uid")
 
     def __init__(self, owner_uid: str | None, active: bool) -> None:
         self.owner_uid = owner_uid

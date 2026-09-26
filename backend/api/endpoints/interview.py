@@ -14,7 +14,7 @@ Endpoints
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter
@@ -56,7 +56,7 @@ class NextQuestionRequest(BaseModel):
 @router.post("/start", summary="Create a Socratic interview session, return WebSocket URL")
 async def start_interview(req: StartInterviewRequest) -> dict[str, Any]:
     """Issue a stable session_id; the WS handler in main.py picks it up."""
-    started = datetime.now(timezone.utc)
+    started = datetime.now(UTC)
     session_id = deterministic_id("session", started.isoformat(), req.domain)
     return {
         "status": "ok",

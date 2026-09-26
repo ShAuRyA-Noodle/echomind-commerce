@@ -19,7 +19,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from config.settings import settings
-from core.agents.openrouter import call_one, AgentCall, swarm_model_lineup
+from core.agents.openrouter import AgentCall, call_one, swarm_model_lineup
 from graph.neo4j_client import neo4j_client
 from graph.operations import graph_stats
 from services.llm_service import llm_service

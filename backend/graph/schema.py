@@ -110,10 +110,10 @@ SCHEMA_INIT_QUERIES: Final[list[str]] = [
 # Edge property indexes - created lazily, kept here so the file is also
 # the *complete* DDL story.
 EDGE_INDEX_QUERIES: Final[list[str]] = [
-    "CREATE INDEX contradicts_resolution_idx IF NOT EXISTS "
-    "FOR ()-[r:CONTRADICTS]-() ON (r.resolution)",
-    "CREATE INDEX similar_to_score_idx IF NOT EXISTS "
-    "FOR ()-[r:SIMILAR_TO]-() ON (r.embedding_similarity)",
+    ("CREATE INDEX contradicts_resolution_idx IF NOT EXISTS "
+    "FOR ()-[r:CONTRADICTS]-() ON (r.resolution)"),
+    ("CREATE INDEX similar_to_score_idx IF NOT EXISTS "
+    "FOR ()-[r:SIMILAR_TO]-() ON (r.embedding_similarity)"),
 ]
 
 
@@ -122,11 +122,11 @@ ALL_INIT_QUERIES: Final[list[str]] = [*SCHEMA_INIT_QUERIES, *EDGE_INDEX_QUERIES]
 
 
 __all__ = [
-    "EMBEDDING_DIM",
-    "SIMILARITY_FUNCTION",
-    "NODE_TYPES",
-    "EMBEDDING_NODE_TYPES",
-    "SCHEMA_INIT_QUERIES",
-    "EDGE_INDEX_QUERIES",
     "ALL_INIT_QUERIES",
+    "EDGE_INDEX_QUERIES",
+    "EMBEDDING_DIM",
+    "EMBEDDING_NODE_TYPES",
+    "NODE_TYPES",
+    "SCHEMA_INIT_QUERIES",
+    "SIMILARITY_FUNCTION",
 ]

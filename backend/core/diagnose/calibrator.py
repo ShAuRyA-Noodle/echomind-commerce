@@ -21,8 +21,6 @@ NOT interchangeable.
 
 from __future__ import annotations
 
-from typing import Literal
-
 from api.schemas import CalibrationBlock, CalibrationLabel, UncertaintyType
 
 # Bucket boundaries - locked by §9.3. Anything that needs to change here is a
@@ -143,10 +141,10 @@ def reasoning_string(block: CalibrationBlock, supporting_nodes: int) -> str:
 
 __all__ = [
     "adjusted_confidence",
-    "evidence_factor_from_count",
-    "coverage_factor",
-    "label_for",
-    "uncertainty_type_for",
     "calibrate",
+    "coverage_factor",
+    "evidence_factor_from_count",
+    "label_for",
     "reasoning_string",
+    "uncertainty_type_for",
 ]
