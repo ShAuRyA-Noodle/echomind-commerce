@@ -39,34 +39,29 @@ export default function GraphPage({ params }: { params: Promise<{ storeId: strin
   const [filter, setFilter] = React.useState<Set<NodeType>>(new Set(NODE_TYPES));
   const [query, setQuery] = React.useState("");
   const [selected, setSelected] = React.useState<ApiNodeDetail | null>(null);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
-  const refresh = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const r = await apiClient.request<ApiGraphResponse>({
+  React.useEffect(() => {
+    let active = true;
+    apiClient.request<ApiGraphResponse>({
         path: `/api/graph/${storeId}`,
         query: { limit: 600 },
-      });
-      setNodes(
-        r.nodes.map((n) => ({
+      }).then((r) => {
+      if (!active) return;
+      setNodes(r.nodes.map((n) => ({
           id: n.id,
           type: n.type,
           label: n.label ?? n.id,
           confidence: n.confidence,
-        }))
-      );
+        })));
       setEdges(r.edges.map((e) => ({ ...e })));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
-  }, [storeId]);
-
-  React.useEffect(() => {
-    refresh();
-  }, [refresh]);
+    }).catch((e: unknown) => {
+      if (active) setError(e instanceof Error ? e.message : String(e));
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
+  }, [storeId, reloadKey]);
 
   function toggleType(t: NodeType): void {
     setFilter((prev) => {
@@ -118,7 +113,11 @@ export default function GraphPage({ params }: { params: Promise<{ storeId: strin
           <span className="font-mono">
             {filteredNodes.length} nodes - {filteredEdges.length} edges
           </span>
-          <Button size="sm" variant="outline" onClick={refresh} disabled={loading}>
+          <Button size="sm" variant="outline" onClick={() => {
+            setLoading(true);
+            setError(null);
+            setReloadKey((key) => key + 1);
+          }} disabled={loading}>
             {loading ? "Loading..." : "Reload"}
           </Button>
         </div>
