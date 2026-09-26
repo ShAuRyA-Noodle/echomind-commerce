@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { JSX } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
