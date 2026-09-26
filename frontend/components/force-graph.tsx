@@ -91,7 +91,9 @@ export function ForceGraph({
     const fresh = new Set<string>();
     for (const n of nodes) if (n.fresh) fresh.add(n.id);
     if (fresh.size === 0) return;
-    setPulseSet((prev) => new Set([...prev, ...fresh]));
+    const frame = window.requestAnimationFrame(() => {
+      setPulseSet((prev) => new Set([...prev, ...fresh]));
+    });
     const t = window.setTimeout(() => {
       setPulseSet((prev) => {
         const next = new Set(prev);
@@ -99,7 +101,10 @@ export function ForceGraph({
         return next;
       });
     }, 800);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(t);
+    };
   }, [nodes]);
 
   const data = React.useMemo(

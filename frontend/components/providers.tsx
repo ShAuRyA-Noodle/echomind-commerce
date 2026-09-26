@@ -24,17 +24,15 @@ export function useAuth(): AuthState {
 
 function AuthProvider({ children }: { children: React.ReactNode }): React.ReactElement {
   const [user, setUser] = React.useState<User | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(true);
+  const [waitingForAuth, setWaitingForAuth] = React.useState<boolean>(true);
   const configured = isFirebaseConfigured();
+  const loading = configured && waitingForAuth;
 
   React.useEffect(() => {
-    if (!configured) {
-      setLoading(false);
-      return;
-    }
+    if (!configured) return;
     const unsub = onAuthStateChanged(firebaseAuth, (next) => {
       setUser(next);
-      setLoading(false);
+      setWaitingForAuth(false);
     });
     return () => unsub();
   }, [configured]);
