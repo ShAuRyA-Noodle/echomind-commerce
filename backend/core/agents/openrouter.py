@@ -27,7 +27,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from openai import APIError, APITimeoutError, AsyncOpenAI, RateLimitError as OpenAIRateLimitError
+from openai import APIError, APITimeoutError, AsyncOpenAI
+from openai import RateLimitError as OpenAIRateLimitError
 from tenacity import (
     AsyncRetrying,
     retry_if_exception_type,
@@ -151,9 +152,9 @@ async def call_one(call: AgentCall) -> AgentResponse:
 
 
 __all__ = [
-    "swarm_model_lineup",
-    "adversarial_model",
     "AgentCall",
     "AgentResponse",
+    "adversarial_model",
     "call_one",
+    "swarm_model_lineup",
 ]

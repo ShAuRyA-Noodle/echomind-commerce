@@ -73,7 +73,7 @@ class FirebaseService:
         if self._app is not None:
             try:
                 firebase_admin.delete_app(self._app)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 logger.exception("firebase.shutdown.failed")
             self._app = None
 

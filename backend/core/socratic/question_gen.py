@@ -57,8 +57,8 @@ def generate_question(
     raw = ""
     try:
         raw = llm_service.gemini_flash(prompt, temperature=0.7)
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("question_gen.failed exc=%r", exc)
+    except Exception as exc:
+        logger.exception("question_gen.failed")
         return GeneratedQuestion(question=None, raw_text=raw, uncertainty_notes=repr(exc))
 
     parsed = safe_json_loads(raw)

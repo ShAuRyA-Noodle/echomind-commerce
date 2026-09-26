@@ -23,7 +23,6 @@ from fastapi import HTTPException
 
 from api.ownership import OWNER_PROP, ScopeContext, _claims_to_scope
 
-
 # ---------------------------------------------------------------------------
 # Inactive scope == open demo. Everything is a no-op.
 # ---------------------------------------------------------------------------

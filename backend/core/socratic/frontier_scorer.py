@@ -18,11 +18,10 @@ the top-K nodes from this score.
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from api.schemas import SocraticPhase, TruthCategory
-
 
 # Expected outbound-edge counts by node type (for connectivity_gap).
 EXPECTED_EDGES_BY_TYPE: dict[str, int] = {
@@ -102,10 +101,10 @@ def top_k(
 __all__ = [
     "EXPECTED_EDGES_BY_TYPE",
     "FrontierInputs",
-    "depth_need",
     "connectivity_gap",
-    "recency_decay",
-    "phase_weight",
+    "depth_need",
     "frontier_score",
+    "phase_weight",
+    "recency_decay",
     "top_k",
 ]

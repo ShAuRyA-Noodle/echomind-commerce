@@ -17,7 +17,7 @@ Coffee catalog; tuning notes live in Decision Log #22.
 from __future__ import annotations
 
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from graph.embeddings import cosine_similarity, embed_text
 
@@ -129,10 +129,10 @@ def merge_groups(names: Iterable[str]) -> list[set[str]]:
 
 
 __all__ = [
-    "resolve_pair",
-    "merge_groups",
+    "COSINE_DISCARD",
+    "COSINE_MERGE",
     "LEVENSHTEIN_RATIO_MERGE",
     "LEVENSHTEIN_RATIO_REJECT",
-    "COSINE_MERGE",
-    "COSINE_DISCARD",
+    "merge_groups",
+    "resolve_pair",
 ]

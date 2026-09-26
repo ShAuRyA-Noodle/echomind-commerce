@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from api.schemas import FixSuggestion
 from services.shopify_service import ShopifyError, shopify_service
@@ -121,7 +121,7 @@ async def apply_fix(
             resource_id = target_product_gid
         else:
             raise ShopifyError(f"unknown fix_type: {fix.fix_type}")
-    except Exception:  # noqa: BLE001 - surface to caller, log here
+    except Exception:
         from utils.logging_safety import safe_log
         logger.exception("fix.apply_failed fix_id=%s", safe_log(fix.id))
         raise
@@ -129,7 +129,7 @@ async def apply_fix(
     return fix.model_copy(
         update={
             "applied": True,
-            "applied_at": datetime.now(timezone.utc),
+            "applied_at": datetime.now(UTC),
             "shopify_resource_id": resource_id,
         }
     )

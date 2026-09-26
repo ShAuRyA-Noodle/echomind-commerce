@@ -141,8 +141,8 @@ def extract_chunk(
     text = ""
     try:
         text = llm_service.gemini_flash(prompt)
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("extractor.gemini_failed exc=%r", exc)
+    except Exception:
+        logger.exception("extractor.gemini_failed")
         return ExtractionResult(parse_failed=True, raw_text=text)
 
     parsed = safe_json_loads(text)

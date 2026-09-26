@@ -125,7 +125,7 @@ def underrepresented_tacit_category(
 __all__ = [
     "PHASE_ORDER",
     "GraphSnapshot",
-    "should_advance",
     "advance_if_ready",
+    "should_advance",
     "underrepresented_tacit_category",
 ]

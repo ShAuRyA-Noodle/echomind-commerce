@@ -56,7 +56,6 @@ Prompt-engineering principles applied throughout
 
 from __future__ import annotations
 
-
 # =============================================================================
 # 1. SOCRATIC_QUESTION_GENERATION_PROMPT
 # -----------------------------------------------------------------------------
@@ -1106,16 +1105,16 @@ Examples of non-redundant pairs:
 
 
 __all__ = [
-    "SOCRATIC_QUESTION_GENERATION_PROMPT",
-    "EXTRACTION_PROMPT_FLASH",
-    "BUYER_PROMPT_GENERATION",
-    "AGENT_SIMULATOR_SYSTEM_PROMPT",
-    "GAP_JUDGE_PROMPT",
-    "CALIBRATOR_REASONING_PROMPT",
-    "FIX_COPY_GENERATION_PROMPT",
-    "DECISION_TREE_BUILDER_PROMPT",
-    "CONTRADICTION_RESOLVER_PROMPT",
-    "TWIN_REASONING_PROMPT",
     "ADVERSARIAL_BUYER_PROMPT",
+    "AGENT_SIMULATOR_SYSTEM_PROMPT",
+    "BUYER_PROMPT_GENERATION",
+    "CALIBRATOR_REASONING_PROMPT",
+    "CONTRADICTION_RESOLVER_PROMPT",
+    "DECISION_TREE_BUILDER_PROMPT",
+    "EXTRACTION_PROMPT_FLASH",
+    "FIX_COPY_GENERATION_PROMPT",
+    "GAP_JUDGE_PROMPT",
     "REDUNDANCY_CHECK_PROMPT",
+    "SOCRATIC_QUESTION_GENERATION_PROMPT",
+    "TWIN_REASONING_PROMPT",
 ]

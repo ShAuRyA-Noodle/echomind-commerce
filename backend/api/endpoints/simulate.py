@@ -13,7 +13,7 @@ Endpoints
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter
@@ -51,12 +51,11 @@ async def run_simulation(req: SimulateRequest) -> dict[str, Any]:
         1. `buyer_prompt_texts` (direct injection, bypasses Gemini Flash)
         2. Gemini Flash generator (uses merchant truths + customer questions)
     """
-    started = datetime.now(timezone.utc)
+    started = datetime.now(UTC)
     run_id = deterministic_id("run", started.isoformat(), str(req.n_prompts))
 
     if req.buyer_prompt_texts:
         # Direct injection path - no Gemini Flash needed.
-        from api.schemas import IntentClass
         runner_input: list[BuyerPromptInput] = []
         for i, text in enumerate(req.buyer_prompt_texts):
             bp_id = deterministic_id("bp", run_id, str(i), text[:32])
@@ -114,7 +113,7 @@ async def run_simulation(req: SimulateRequest) -> dict[str, Any]:
         if r.parse_failed:
             parse_failures += 1
 
-    duration = round((datetime.now(timezone.utc) - started).total_seconds(), 2)
+    duration = round((datetime.now(UTC) - started).total_seconds(), 2)
     logger.info(
         "simulate.run.complete run_id=%s prompts=%d calls=%d duration_s=%.1f",
         run_id,

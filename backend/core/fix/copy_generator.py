@@ -19,7 +19,6 @@ from typing import Any
 
 from api.schemas import FixSuggestion, FixType, Gap, PredictedDelta
 from config.prompts import FIX_COPY_GENERATION_PROMPT
-from core.diagnose import calibrator
 from graph.operations import deterministic_id
 from services.llm_service import llm_service, safe_json_loads
 
@@ -78,8 +77,8 @@ async def generate_fix(
         loaded = safe_json_loads(raw)
         if isinstance(loaded, dict):
             parsed = loaded
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("fix.copy_gen.failed exc=%r", exc)
+    except Exception:
+        logger.exception("fix.copy_gen.failed")
 
     proposed_text: str | None = None
     voice_match_notes: str | None = None

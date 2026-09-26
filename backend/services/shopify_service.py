@@ -28,7 +28,8 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
 from tenacity import (
@@ -305,7 +306,7 @@ class ShopifyService:
             data = r.json()
         except json.JSONDecodeError as e:
             raise ShopifyError(f"Shopify returned non-JSON: {r.text[:200]}") from e
-        if "errors" in data and data["errors"]:
+        if data.get("errors"):
             logger.warning("shopify.graphql.errors=%s", data["errors"])
         return data
 

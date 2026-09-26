@@ -15,18 +15,18 @@ Endpoints
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 
-from api.schemas import NotImplementedResponse, Product, Policy, TrustSignal
+from api.schemas import NotImplementedResponse, Policy, Product, TrustSignal
 from graph.operations import (
     deterministic_id,
-    upsert_typed,
     graph_stats,
+    upsert_typed,
 )
-from services.shopify_service import shopify_service, ShopifyError
+from services.shopify_service import ShopifyError, shopify_service
 
 logger = logging.getLogger("echomind.api.onboard")
 router = APIRouter(prefix="/onboard", tags=["onboard"])
@@ -42,7 +42,7 @@ async def run_ingest(payload: dict[str, Any] | None = None) -> dict[str, Any]:
     Uses the env-configured `SHOPIFY_ADMIN_ACCESS_TOKEN`. Idempotent on
     `Product.id` so re-runs are safe.
     """
-    started = datetime.now(timezone.utc)
+    started = datetime.now(UTC)
     products_written = 0
     policies_written = 0
     reviews_written = 0
@@ -134,7 +134,7 @@ async def run_ingest(payload: dict[str, Any] | None = None) -> dict[str, Any]:
         "policies": policies_written,
         "reviews": reviews_written,
         "started_at": started.isoformat(),
-        "duration_seconds": round((datetime.now(timezone.utc) - started).total_seconds(), 2),
+        "duration_seconds": round((datetime.now(UTC) - started).total_seconds(), 2),
     }
 
 

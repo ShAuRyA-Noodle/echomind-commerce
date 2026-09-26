@@ -11,6 +11,7 @@ Endpoints
 from __future__ import annotations
 
 import logging
+from datetime import UTC
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -255,7 +256,7 @@ async def retest_fix(
                     surfaced_products=r.get("surfaced_products") or [],
                 )
             )
-        except Exception:  # noqa: BLE001 - skip malformed rows
+        except Exception:
             logger.exception("retest.before_rep.parse_failed rep_id=%s", r.get("rep_id"))
         pid = r.get("buyer_prompt_id")
         if pid and r.get("prompt_text") and pid not in prompt_map:
@@ -352,8 +353,8 @@ async def retest_fix(
 
 
 def _utcnow_iso() -> str:
-    from datetime import datetime, timezone
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    from datetime import datetime
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def _serialize_fix(fix: FixSuggestion) -> dict[str, Any]:

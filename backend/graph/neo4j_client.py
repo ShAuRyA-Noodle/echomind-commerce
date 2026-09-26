@@ -101,7 +101,7 @@ class Neo4jClient:
                     "server": version,
                     "database": self.database,
                 }
-        except Exception:  # noqa: BLE001 - health must be defensive
+        except Exception:
             logger.exception("neo4j.ping.failed")
             return {"status": "error"}
 
@@ -131,10 +131,12 @@ class Neo4jClient:
         parameters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Execute a single statement synchronously. Used by bootstrap scripts."""
-        with GraphDatabase.driver(self.uri, auth=(self.username, self.password)) as driver:
-            with driver.session(database=self.database) as session:
-                result = session.run(cypher, parameters or {})
-                return [record.data() for record in result]
+        with (
+            GraphDatabase.driver(self.uri, auth=(self.username, self.password)) as driver,
+            driver.session(database=self.database) as session,
+        ):
+            result = session.run(cypher, parameters or {})
+            return [record.data() for record in result]
 
 
 # Module-level singleton; bound to the configured environment.

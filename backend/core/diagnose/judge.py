@@ -57,8 +57,8 @@ async def classify_candidate(
         loaded = safe_json_loads(raw)
         if isinstance(loaded, dict):
             parsed = loaded
-    except Exception as exc:  # noqa: BLE001 - judge failures must not crash diagnose
-        logger.exception("judge.failed exc=%r", exc)
+    except Exception:
+        logger.exception("judge.failed")
         parsed = None
 
     # Default to the pre-filter's candidate type if the judge can't classify.
@@ -76,7 +76,7 @@ async def classify_candidate(
         raw_conf = float(ci.get("raw_confidence", raw_conf) or raw_conf)
         supporting_nodes = int(ci.get("supporting_nodes_count", supporting_nodes) or supporting_nodes)
         coverage_in = float(ci.get("coverage_factor", 0.0) or 0.0)
-        relevant_nodes = max(1, int(round(coverage_in * expected_relevant_nodes)))
+        relevant_nodes = max(1, round(coverage_in * expected_relevant_nodes))
         chain = parsed.get("reasoning_chain") or []
         if isinstance(chain, list):
             reasoning_chain_text = " | ".join(
@@ -142,4 +142,4 @@ async def classify_all(
     return out
 
 
-__all__ = ["classify_candidate", "classify_all"]
+__all__ = ["classify_all", "classify_candidate"]

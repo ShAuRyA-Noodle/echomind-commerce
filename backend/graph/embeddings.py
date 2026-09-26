@@ -10,8 +10,8 @@ text-embedding-004. Adds:
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from functools import lru_cache
-from typing import Iterable
 
 from services.llm_service import llm_service
 
@@ -70,4 +70,4 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     return dot / ((norm_a**0.5) * (norm_b**0.5))
 
 
-__all__ = ["embed_text", "embed_texts", "cosine_similarity"]
+__all__ = ["cosine_similarity", "embed_text", "embed_texts"]

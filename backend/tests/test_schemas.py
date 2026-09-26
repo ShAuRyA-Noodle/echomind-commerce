@@ -20,6 +20,7 @@ from __future__ import annotations
 from typing import Any, get_args
 
 import pytest
+from pydantic import ValidationError
 
 from api.schemas import (
     EDGE_MODELS,
@@ -37,7 +38,6 @@ from api.schemas import (
     TacitCategory,
     TruthCategory,
 )
-
 
 # ---------------------------------------------------------------------------
 # Enum canonical-set tests - drift detector
@@ -178,7 +178,7 @@ def test_merchant_truth_carries_both_orthogonal_categories(
 
 def test_extra_fields_are_rejected() -> None:
     """`_Base` sets `extra='forbid'` - schema drift surfaces immediately."""
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         NODE_MODELS["Product"].model_validate(
             {"id": "p1", "title": "x", "shenanigans": True}
         )
@@ -321,7 +321,7 @@ def test_knowledge_source_open_node_type() -> None:
 
 def test_reasoning_step_confidence_is_bounded() -> None:
     """Step confidence is clamped to [0, 1]; out-of-range is rejected."""
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         ReasoningStep.model_validate(
             {"step": 1, "claim": "x", "source_node_ids": [], "confidence": 1.5}
         )

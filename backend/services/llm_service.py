@@ -25,11 +25,12 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import google.generativeai as genai
-from openai import AsyncOpenAI, OpenAI
-from openai import APIError, APITimeoutError, RateLimitError as OpenAIRateLimitError
+from openai import APIError, APITimeoutError, AsyncOpenAI, OpenAI
+from openai import RateLimitError as OpenAIRateLimitError
 from tenacity import (
     AsyncRetrying,
     retry,
@@ -214,12 +215,13 @@ class LLMService:
                 json_schema=json_schema,
                 temperature=temperature,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             exc_str = repr(exc)
-            if "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower():
-                if settings.GROQ_API_KEY:
-                    logger.warning("llm.gemini_flash.quota_exceeded - falling back to Groq")
-                    return self._groq_call_sync(prompt, temperature=temperature)
+            if (
+                "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower()
+            ) and settings.GROQ_API_KEY:
+                logger.warning("llm.gemini_flash.quota_exceeded - falling back to Groq")
+                return self._groq_call_sync(prompt, temperature=temperature)
             raise
 
     @_retry_decorator()
@@ -338,7 +340,7 @@ class LLMService:
             text = self.gemini_flash("Reply with the single word: pong.")
             out["gemini_flash"] = "ok" if text else "empty"
             out["sample"] = (text or "").strip()[:64]
-        except Exception:  # noqa: BLE001 - health endpoints must be defensive
+        except Exception:
             logger.exception("llm.healthcheck.failed")
             out["gemini_flash"] = "error"
         return out

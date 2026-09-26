@@ -74,4 +74,4 @@ def _llm_check(candidate: str, last_questions: list[str]) -> bool:
     return bool(parsed.get("is_redundant", False))
 
 
-__all__ = ["is_redundant", "COSINE_DEFINITELY_REDUNDANT", "COSINE_DEFINITELY_DISTINCT"]
+__all__ = ["COSINE_DEFINITELY_DISTINCT", "COSINE_DEFINITELY_REDUNDANT", "is_redundant"]

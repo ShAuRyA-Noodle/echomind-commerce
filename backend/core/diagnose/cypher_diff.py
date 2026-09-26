@@ -143,10 +143,10 @@ async def find_all_candidates() -> dict[GapType, list[GapCandidate]]:
 
 __all__ = [
     "GapCandidate",
-    "find_omission_candidates",
-    "find_contradiction_candidates",
-    "find_ambiguity_candidates",
-    "find_hallucination_candidates",
-    "find_dark_zone_candidates",
     "find_all_candidates",
+    "find_ambiguity_candidates",
+    "find_contradiction_candidates",
+    "find_dark_zone_candidates",
+    "find_hallucination_candidates",
+    "find_omission_candidates",
 ]

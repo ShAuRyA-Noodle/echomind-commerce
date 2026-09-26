@@ -4,7 +4,6 @@ from . import schemas
 from .endpoints import audit, auth, diagnose, fix, graph, interview, onboard, simulate
 
 __all__ = [
-    "schemas",
     "audit",
     "auth",
     "diagnose",
@@ -12,5 +11,6 @@ __all__ = [
     "graph",
     "interview",
     "onboard",
+    "schemas",
     "simulate",
 ]

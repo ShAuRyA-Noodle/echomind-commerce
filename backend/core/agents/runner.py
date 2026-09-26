@@ -19,12 +19,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Awaitable, Callable
+from datetime import UTC, datetime
 
 from api.schemas import AgentRepresentation
-from config.settings import settings
 from core.agents.openrouter import (
     AgentCall,
     AgentResponse,
@@ -150,7 +149,7 @@ def _to_representation(buyer_prompt_id: str, resp: AgentResponse) -> AgentRepres
         cited_policies=cited_policies,
         confidence_in_recommendation=confidence,
         latency_ms=resp.latency_ms,
-        captured_at=datetime.now(timezone.utc),
+        captured_at=datetime.now(UTC),
         parse_failed=resp.parse_failed,
     )
 

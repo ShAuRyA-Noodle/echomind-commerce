@@ -71,7 +71,7 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         token = auth.split(" ", 1)[1].strip()
         try:
             claims = firebase_service.verify_id_token(token)
-        except Exception:
+        except Exception:  # noqa: BLE001 - reject any token verification failure
             logger.warning("auth.mw.verify_failed path=%s", path)
             return JSONResponse(
                 status_code=401,

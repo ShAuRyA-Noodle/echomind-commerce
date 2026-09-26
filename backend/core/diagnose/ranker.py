@@ -23,7 +23,6 @@ from dataclasses import dataclass
 
 from api.schemas import CalibrationLabel, Gap
 
-
 # Confidence weight per bucket. `dont_know` and `low_confidence` are zeroed so
 # they don't accidentally rank above genuinely high-evidence gaps.
 _CONF_WEIGHT: dict[CalibrationLabel, float] = {
