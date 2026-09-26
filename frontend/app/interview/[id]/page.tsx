@@ -72,7 +72,14 @@ function useWebSpeech(onFinal: (text: string) => void): MicState {
     };
     rec.onend = () => setListening(false);
     recognitionRef.current = rec;
-    setSupported(true);
+    const frame = window.requestAnimationFrame(() => setSupported(true));
+    return () => {
+      window.cancelAnimationFrame(frame);
+      rec.onresult = () => {};
+      rec.onend = () => {};
+      try { rec.stop(); } catch { /* Speech recognition may not have started. */ }
+      recognitionRef.current = null;
+    };
   }, [onFinal]);
 
   function start(): void {
@@ -98,30 +105,15 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
   const { id } = React.use(params);
   const { state, start, nextQuestion, advancePhase, sendText } = useInterviewSocket(id);
   const [textDraft, setTextDraft] = React.useState("");
-  const [graphNodes, setGraphNodes] = React.useState<GraphNode[]>([]);
+  const graphNodes = React.useMemo<GraphNode[]>(() => state.added.map((a) => ({
+    id: a.id,
+    type: a.type,
+    label: a.label ?? a.id,
+    confidence: 0.7,
+    fresh: a.fresh,
+  })), [state.added]);
   const [graphEdges] = React.useState<GraphEdge[]>([]);
   const transcriptEndRef = React.useRef<HTMLDivElement | null>(null);
-
-  // Convert backend "added" stream into ForceGraph nodes (+ pulse fresh).
-  React.useEffect(() => {
-    if (state.added.length === 0) return;
-    setGraphNodes((prev) => {
-      const seen = new Set(prev.map((n) => n.id));
-      const incoming: GraphNode[] = [];
-      for (const a of state.added) {
-        if (seen.has(a.id)) continue;
-        incoming.push({
-          id: a.id,
-          type: a.type,
-          label: a.label ?? a.id,
-          confidence: 0.7,
-          fresh: true,
-        });
-        seen.add(a.id);
-      }
-      return [...prev.map((n) => ({ ...n, fresh: false })), ...incoming];
-    });
-  }, [state.added]);
 
   // Auto-scroll transcript.
   React.useEffect(() => {

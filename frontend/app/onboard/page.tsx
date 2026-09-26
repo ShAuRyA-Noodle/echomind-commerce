@@ -75,7 +75,11 @@ export default function OnboardPage(): React.ReactElement {
   }
 
   React.useEffect(() => {
-    refreshStats();
+    let active = true;
+    apiClient.request<IngestStatsResponse>({ path: "/api/onboard/ingest/status" })
+      .then((s) => { if (active) setStats(s); })
+      .catch(() => { /* Backend may be offline during local setup. */ });
+    return () => { active = false; };
   }, []);
 
   async function runIngest(): Promise<void> {

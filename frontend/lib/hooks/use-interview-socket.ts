@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   createWsClient,
@@ -20,6 +20,7 @@ export interface GraphAdded {
   type: string;
   id: string;
   label?: string;
+  fresh?: boolean;
 }
 
 export interface InterviewProgress {
@@ -117,7 +118,19 @@ export function useInterviewSocket(sessionId: string): UseInterviewSocketHandle 
       }),
       ws.subscribe("graph_update", (e: BackendEvent) => {
         const added = (e.added as GraphAdded[]) ?? [];
-        setState((s) => ({ ...s, added: [...s.added, ...added] }));
+        setState((s) => {
+          const seen = new Set(s.added.map((node) => node.id));
+          const incoming = added.filter((node) => {
+            if (seen.has(node.id)) return false;
+            seen.add(node.id);
+            return true;
+          }).map((node) => ({ ...node, fresh: true }));
+          if (incoming.length === 0) return s;
+          return {
+            ...s,
+            added: [...s.added.map((node) => ({ ...node, fresh: false })), ...incoming],
+          };
+        });
       }),
       ws.subscribe("phase_change", (e: BackendEvent) => {
         setState((s) => ({
@@ -158,10 +171,10 @@ export function useInterviewSocket(sessionId: string): UseInterviewSocketHandle 
   function advancePhase(): void {
     wsRef.current?.send({ type: "control", action: "advance_phase" });
   }
-  function sendText(text: string): void {
+  const sendText = useCallback((text: string): void => {
     if (!text.trim()) return;
     wsRef.current?.send({ type: "text_input", text });
-  }
+  }, []);
   function close(): void {
     wsRef.current?.close();
   }
