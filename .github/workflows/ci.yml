@@ -60,6 +60,8 @@ jobs:
         run: npm run type-check
       - name: Lint
         run: npm run lint
+      - name: Build
+        run: npm run build
 
   alignment:
     name: Cross-file alignment (no em dashes, schemas in sync)
