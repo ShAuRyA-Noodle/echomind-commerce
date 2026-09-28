@@ -5,7 +5,7 @@ fastapi>=0.115,<0.140
 uvicorn[standard]>=0.30,<0.52
 websockets>=13,<17
 pydantic==2.9.*
-pydantic-settings>=2.5,<2.15
+pydantic-settings>=2.5,<2.16
 neo4j==5.25.*
 google-generativeai==0.8.*
 google-cloud-speech>=2.27,<2.41
