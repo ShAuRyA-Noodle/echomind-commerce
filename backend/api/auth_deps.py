@@ -18,12 +18,25 @@ from typing import Any
 from fastapi import Depends, HTTPException, Request, WebSocket, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from config.settings import settings
 from services.firebase_service import firebase_service
 
 logger = logging.getLogger("echomind.auth")
 
 _AUTH_REQUIRED = os.getenv("AUTH_REQUIRED", "true").lower() not in {"false", "0", "no"}
 _BEARER = HTTPBearer(auto_error=False)
+
+
+def auth_enabled() -> bool:
+    """True unless the local-demo escape hatch `AUTH_REQUIRED=false` is set."""
+    return _AUTH_REQUIRED
+
+
+def _ws_origin_allowed(websocket: WebSocket) -> bool:
+    """Block cross-site WebSocket hijacking: browsers always send Origin, and it
+    must match the same allow-list CORS uses. Non-browser clients send none."""
+    origin = websocket.headers.get("origin")
+    return origin is None or origin in settings.cors_origins
 
 
 def _decode(token: str) -> dict[str, Any] | None:
@@ -58,7 +71,12 @@ def require_user(
 async def verify_ws_token(websocket: WebSocket) -> dict[str, Any] | None:
     """WebSocket auth. Reads token from `?token=` query param or
     `Sec-WebSocket-Protocol` subprotocol. Closes with 4401 on failure.
-    Returns claims (or sentinel when AUTH_REQUIRED=false)."""
+    Returns claims (or sentinel when AUTH_REQUIRED=false).
+    Closes with 4403 when the browser Origin is not on the CORS allow-list."""
+    if not _ws_origin_allowed(websocket):
+        logger.warning("auth.ws.origin_rejected")
+        await websocket.close(code=4403, reason="Origin not allowed")
+        return None
     if not _AUTH_REQUIRED:
         return {"uid": "anonymous-local", "_auth_disabled": True}
 

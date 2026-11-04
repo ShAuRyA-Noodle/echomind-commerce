@@ -14,18 +14,21 @@ import logging
 from datetime import UTC
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
+from api.auth_deps import auth_enabled
 from api.ownership import ScopeContext, scope_ctx
 from api.schemas import AgentRepresentation, FixSuggestion, Gap
 from config.prompts import AGENT_SIMULATOR_SYSTEM_PROMPT
+from config.settings import settings
 from core.agents.runner import BuyerPromptInput, run_swarm
 from core.fix.copy_generator import generate_fix
 from core.fix.retest_orchestrator import measure_delta, serialize_delta
 from core.fix.shopify_writer import apply_fix
 from graph.neo4j_client import neo4j_client
 from graph.operations import upsert_typed
+from utils.logging_safety import safe_log
 
 logger = logging.getLogger("echomind.api.fix")
 router = APIRouter(prefix="/fix", tags=["fix"])
@@ -59,6 +62,11 @@ async def generate_fix_endpoint(
     When auth is on the gap must belong to the caller, and the new
     FixSuggestion is stamped with the owner so it scopes on later reads/applies.
     """
+    if not settings.GEMINI_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Fix generation needs Gemini: GEMINI_API_KEY is not set.",
+        )
     # Ownership gate: the Gap this fix targets must be the caller's (when auth on).
     if scope.active:
         gap_rows = await neo4j_client.run(
@@ -101,6 +109,16 @@ async def apply_fix_full(
     owns them before touching Shopify. A cross-tenant fix/target is rejected with
     403; an unknown one with 404. No-op when auth is off (open demo unchanged).
     """
+    # Live-store writes are never open to the internet: with the
+    # AUTH_REQUIRED=false demo switch they only run on a local backend.
+    if not auth_enabled() and not settings.is_local:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Applying fixes to a live Shopify store needs sign-in. "
+                "Set AUTH_REQUIRED=true for any non-local deployment."
+            ),
+        )
     if scope.active:
         await _authorize_apply(req, scope)
 
@@ -146,8 +164,8 @@ async def _authorize_apply(req: ApplyFixFullRequest, scope: ScopeContext) -> Non
     if not checked_any:
         logger.info(
             "fix.apply.no_persisted_resource fix_id=%s gid=%s - allowing (nothing owned to violate)",
-            fix_id,
-            req.target_product_gid,
+            safe_log(fix_id),
+            safe_log(req.target_product_gid),
         )
 
 

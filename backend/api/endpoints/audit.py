@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends
 from api.ownership import ScopeContext, scope_ctx
 from graph.neo4j_client import neo4j_client
 from graph.operations import graph_stats
+from utils.logging_safety import safe_log
 
 logger = logging.getLogger("echomind.api.audit")
 router = APIRouter(prefix="/audit", tags=["audit"])
@@ -101,7 +102,7 @@ async def get_timeline(
     Used by the /replay page to build its timeline scrubber and event log.
     Scoped to the authenticated owner when auth is enabled.
     """
-    logger.debug("audit.timeline store_id=%s", store_id)
+    logger.debug("audit.timeline store_id=%s", safe_log(store_id))
     agent_rows = await neo4j_client.run(
         f"""
         MATCH (a:AgentRepresentation)
@@ -214,7 +215,7 @@ async def get_decisions(
     "returns"/"shipping"/"warranty" map naturally; "all" or omitted = no filter.
     Scoped to the authenticated owner when auth is enabled.
     """
-    logger.debug("audit.decisions store_id=%s type=%s", store_id, type)
+    logger.debug("audit.decisions store_id=%s type=%s", safe_log(store_id), safe_log(type))
     needle = (type or "").replace("-", " ").strip().lower()
     apply_filter = bool(needle) and needle != "all"
 
