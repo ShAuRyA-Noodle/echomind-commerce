@@ -39,8 +39,10 @@ _GID_RE = {
     "Product": re.compile(r"^gid://shopify/Product/\d+$"),
     "Page": re.compile(r"^gid://shopify/Page/\d+$"),
 }
-_HTML_TAG_RE = re.compile(r"<\s*/?\s*[a-zA-Z!?]")
-_SCRIPT_BREAKOUT_RE = re.compile(r"<\s*/\s*script|<!--", re.IGNORECASE)
+# Linear-time patterns (no nested or adjacent \s* runs), matching how HTML
+# parsers open a tag: "<" or "</" followed directly by a letter, "!" or "?".
+_HTML_TAG_RE = re.compile(r"</?[a-zA-Z!?]")
+_SCRIPT_BREAKOUT_RE = re.compile(r"</script|<!--", re.IGNORECASE)
 
 
 class FixValidationError(ShopifyError):
@@ -68,7 +70,7 @@ def _clean_text(fix: FixSuggestion) -> str:
 
 def _plain_text_to_html(text: str) -> str:
     """Escape plain-text copy so no markup or script can reach a storefront page."""
-    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    paragraphs = [p.strip() for p in re.split(r"\n[ \t\r]*\n", text) if p.strip()]
     return "".join(
         "<p>" + html.escape(p).replace("\n", "<br>") + "</p>" for p in paragraphs
     )
