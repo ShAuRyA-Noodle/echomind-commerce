@@ -27,7 +27,10 @@
     "undici": "^6.24.0",
     "glob": "^10.5.0",
     "postcss": "$postcss",
-    "@grpc/grpc-js": "^1.14.7"
+    "@grpc/grpc-js": "^1.14.7",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
