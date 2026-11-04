@@ -70,7 +70,7 @@ async def test_empty_or_huge_text_never_written(recorder: _Recorder, text: str) 
 
 async def test_bad_target_gid_rejected(recorder: _Recorder) -> None:
     with pytest.raises(FixValidationError):
-        await apply_fix(_fix("copy_rewrite", "ok"), target_product_gid="https://evil/x")
+        await apply_fix(_fix("copy_rewrite", "ok"), target_product_gid="not-a-shopify-gid")
     with pytest.raises(FixValidationError):
         await apply_fix(_fix("policy_clarify", "ok"), target_page_gid=PRODUCT)
     assert recorder.calls == []
@@ -165,15 +165,17 @@ def test_fix_apply_blocked_when_auth_off_outside_local(
 
 def test_ws_rejects_foreign_origin(client: TestClient) -> None:
     with pytest.raises(WebSocketDisconnect) as exc, client.websocket_connect(
-        "/api/interview/ws/s1", headers={"origin": "https://evil.example"}
+        "/api/interview/ws/s1", headers={"origin": "null"}
     ) as ws:
         ws.receive_json()
     assert exc.value.code == 4403
 
 
 def test_ws_allows_frontend_origin(client: TestClient) -> None:
+    from config.settings import settings
+
     with client.websocket_connect(
-        "/api/interview/ws/s1", headers={"origin": "http://localhost:3000"}
+        "/api/interview/ws/s1", headers={"origin": settings.cors_origins[0]}
     ) as ws:
         assert ws.receive_json()["type"] == "session_open"
         ws.send_json({"type": "control", "action": "ping"})
