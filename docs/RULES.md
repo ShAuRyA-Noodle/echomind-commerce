@@ -12,8 +12,8 @@
 - **Name:** KASPARRO - Agentic Commerce Hackathon
 - **Tagline:** "Build AI agents that discover, explain, and sell better on Shopify."
 - **Organizer:** Kasparro (an early-stage AI commerce infrastructure company; engineers work directly on real merchant problems, not just product).
-- **Open to:** All college students | UG & PG | Teams of 2 recommended.
-- **Format:** Fully **remote hackathon**. Work from home, college, or at your own pace. (Source: 2.47.21 PM)
+- **Teams:** Teams of 2 recommended.
+- **Format:** Fully **remote hackathon**. Work from home or at your own pace. (Source: 2.47.21 PM)
 - **Intentional design:** Solo participation allowed, but **teams of 2 produce stronger submissions**. The judging criteria and quality bar remain identical regardless of team size. (Source: 2.47.21 PM)
 - **Theme / Why this hackathon exists:** ChatGPT started completing purchases inside conversations. Google AI Mode began recommending products directly in search. Shopify launched a free Agentic Plan that connects any merchant's catalog to AI shopping channels. The hackathon is positioned at this **brand-new agentic commerce frontier**: helping shoppers discover, evaluate, build trust in, and buy with confidence - where solutions blend product thinking, engineering depth, and genuine understanding of how commerce works. (Source: 2.47.18 PM)
 
@@ -45,14 +45,10 @@ The build window is intentionally 11 days. Extended timeline = "we want careful,
 ## 3. Eligibility & Team Composition
 
 ### Eligibility (Source: 2.47.54 PM "Eligibility")
-- Open to all college students in India.
-- Undergraduate: 3rd year and 4th year (B.Tech, BCA, BSc, or equivalent).
-- Postgraduate: 1st year and 2nd year (MTech, MCA, or equivalent).
-- MBA, arts, design, and other non-technical students are welcome - **especially as the product-thinking half of a cross-discipline team**.
+- Non-technical participants are welcome - **especially as the product-thinking half of a cross-discipline team**.
 - Teams of 2 strongly recommended; solo participation allowed at the same quality bar.
-- All participants must be currently enrolled students.
-- Cross-college and cross-discipline teams are allowed and encouraged.
-- **Each student can be part of only one team.**
+- Cross-discipline teams are allowed and encouraged.
+- **Each participant can be part of only one team.**
 - You may use any programming language, framework, or AI model.
 - You may use AI coding tools (Cursor, Copilot, Claude, etc.) - **your documentation and interview performance must demonstrate that you understand what you built and why.**
 - One submission per team or individual - you cannot submit to multiple tracks.
@@ -62,7 +58,7 @@ The build window is intentionally 11 days. Extended timeline = "we want careful,
 - Teams of 2 are strongly recommended.
 - Solo allowed, but teams of 2 consistently produce stronger submissions.
 - A strong team usually combines product thinking + engineering. One teammate may have based product framing and UX, the other toward implementation - or both may contribute across both areas.
-- Either is fine. Cross-discipline teams are explicitly encouraged: "an MBA or arts student who can frame a sharp product problem paired with a strong technical builder is exactly the kind of team that produces standout submissions."
+- Either is fine. Cross-discipline teams (a sharp product thinker paired with a strong technical builder) are explicitly encouraged.
 - Submission must clearly state who did what; who led product thinking, who led development, where both contributed jointly. **Any prize or internship offer is made jointly to the team.** (Restated on 2.47.24 PM Prize Pool note: "Prizes are awarded jointly to the team. The career opportunity above is the bigger prize - treat this accordingly.")
 
 ---
@@ -302,7 +298,7 @@ What a strong submission looks like:
 
 - **Register now:** https://forms.gle/dG64ot2vizEqETcA6
   - Registration closes **4th May 2026**.
-  - The form will ask: names + college details of all participants (both members if a team, or your own if solo); programming and year of study (e.g., 3rd year B.Tech, 1st year MTech, 2nd year MBA); which problem statement you are choosing (this can change later); a one-line description of your initial idea (optional but encouraged).
+  - The form will ask: names of all participants (both members if a team, or your own if solo); which problem statement you are choosing (this can change later); a one-line description of your initial idea (optional but encouraged).
 - **WhatsApp group** for questions, clarifications, and updates: https://chat.whatsapp.com/DrlQdijcWuPL5H0PV49rbK
 - **Submit project at:** https://forms.gle/sYaqxeyBAajNPV9t7
 - **Questions:** rajat@kasparro.com
@@ -347,7 +343,7 @@ The screenshots do **not** include an explicit IP-assignment, licensing, or form
 
 - All submissions live on **public GitHub** (so inherently visible / public proof of work).
 - Use of AI coding tools (Cursor, Copilot, Claude) is explicitly allowed, **but** documentation and interview must demonstrate authentic understanding - implicit anti-plagiarism / authorship-verification mechanism.
-- Each student may belong to **only one team**.
+- Each participant may belong to **only one team**.
 - One submission per team or individual; cross-track submissions are not allowed.
 - Career-prize internship implies an offer-conditional working relationship; no explicit ESOP-vesting terms in screenshots beyond "Path to full-time employment with ESOPs after 6 months."
 
@@ -417,8 +413,7 @@ The screenshots do **not** include an explicit IP-assignment, licensing, or form
 
 ### F. Hidden requirements easy to miss
 - **One submission per team or individual; you cannot submit to multiple tracks.** Pick one track and commit.
-- **Each student in only one team.** No double-dipping.
-- **3rd/4th year UG, or 1st/2nd year PG** - earlier-year students are not eligible.
+- **Each participant in only one team.** No double-dipping.
 - Demo video must be **3-5 minutes** with **narration** (not silent screen recording).
 - README must include the demo video link.
 - Contribution note is mandatory even for solo participants (must explain how you split product vs. engineering time).
