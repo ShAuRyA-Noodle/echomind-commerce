@@ -106,6 +106,8 @@ You will receive an acknowledgement within 48 hours. Critical issues are aimed f
 
 | Package | Severity | Where | Why it is accepted |
 |---|---|---|---|
-| `minimatch` < 11.0.1 (via `eslint`, `eslint-config-next`, `eslint-plugin-import`, `eslint-plugin-react`, `eslint-plugin-jsx-a11y`, `typescript-eslint`) | moderate | frontend dev tooling only | Only runs at lint time on our own files, never in the built app. A fix needs ESLint 10 plus plugin releases that drop minimatch 3, and `eslint-config-next` does not support ESLint 10 yet (Dependabot PR #74 failed CI on peer dependencies). Revisit when it does. |
+| `minimatch` 3.1.5 (via `eslint`, `@eslint/eslintrc`, `@eslint/config-array`, `eslint-plugin-import`, `eslint-plugin-react`, `eslint-plugin-jsx-a11y`) | moderate in `npm audit` only | frontend dev tooling only | GHSA-g3hv-75wg-m249. GitHub's advisory covers minimatch 7.0.0 to 11.0.0, so 3.x is outside it and there is no open Dependabot alert for it, but `npm audit` sometimes reports the range as `< 11.0.1`. There is no patched 3.x release, and these packages call minimatch as a v3 function, so it cannot be overridden to v11. Only runs at lint time on our own files, never in the built app. Goes away when `eslint-config-next` supports ESLint 10. |
 
 `@grpc/grpc-js` is pinned to `^1.14.7` through npm `overrides` because `firebase` still depends on a vulnerable `~1.9`. Drop the override once Firebase updates its own range.
+
+`minimatch` inside `@typescript-eslint/typescript-estree` is pinned to `^11.0.1` through a scoped npm override (GHSA-g3hv-75wg-m249, Dependabot alert #117). typescript-estree 8.x still asks for `^10.2.2`, which kept Dependabot's security update from resolving. It only calls `minimatch(path, pattern, { dot: true })`, which works the same in 11. Drop the override once typescript-eslint allows minimatch 11.
