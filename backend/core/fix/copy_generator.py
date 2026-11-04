@@ -14,6 +14,7 @@ Hard rules from `prompts.py::FIX_COPY_GENERATION_PROMPT`:
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -85,16 +86,27 @@ async def generate_fix(
     pdr: PredictedDelta | None = None
 
     if parsed:
-        proposed_text = parsed.get("proposed_text")
-        voice_match_notes = parsed.get("voice_match_notes")
+        raw_text = parsed.get("proposed_text")
+        if isinstance(raw_text, dict | list) and chosen_fix_type in {"metafield_add", "structured_data"}:
+            # JSON fix types: the model sometimes returns the object itself.
+            proposed_text = json.dumps(raw_text, ensure_ascii=False)
+        elif isinstance(raw_text, str):
+            proposed_text = raw_text.strip() or None
+        # Anything else (number, bool, wrong shape) is treated as no answer.
+        notes = parsed.get("voice_match_notes")
+        voice_match_notes = notes if isinstance(notes, str) else None
         pred = parsed.get("predicted_delta_range") or {}
         if isinstance(pred, dict) and pred.get("low") is not None and pred.get("high") is not None:
-            pdr = PredictedDelta(
-                low=float(pred.get("low", 0.0)),
-                high=float(pred.get("high", 0.0)),
-                metric=str(pred.get("metric", "agent_surface_rate_pp")),
-                rationale=pred.get("rationale"),
-            )
+            try:
+                pdr = PredictedDelta(
+                    low=float(pred.get("low", 0.0)),
+                    high=float(pred.get("high", 0.0)),
+                    metric=str(pred.get("metric", "agent_surface_rate_pp")),
+                    rationale=pred.get("rationale") if isinstance(pred.get("rationale"), str) else None,
+                )
+            except (TypeError, ValueError):
+                logger.warning("fix.copy_gen.bad_predicted_delta - using default band")
+                pdr = None
 
     # Fall back to default delta band if Gemini didn't supply one.
     if pdr is None:

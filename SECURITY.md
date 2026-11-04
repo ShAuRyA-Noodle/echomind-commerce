@@ -90,3 +90,22 @@ You will receive an acknowledgement within 48 hours. Critical issues are aimed f
 ---
 
 *Last reviewed: 2026-05-01. This document evolves with the product; entries from build days will be appended in [CHANGELOG.md](CHANGELOG.md).*
+
+## 10. Write-path guards and known advisories (updated 4 Nov 2026)
+
+**Guards on live-store writes (`POST /api/fix/apply`).**
+- With `AUTH_REQUIRED=true` (the default) the route needs a verified Firebase ID token and the owner checks in §2.
+- With `AUTH_REQUIRED=false` it only runs when `ENV` is `local`, `dev` or `development`. Any other `ENV` gets a 403, so an open demo cannot write to a real store.
+- Fix text (Gemini output or a merchant edit) is checked before any Shopify call: it must be non-empty and at most 10,000 characters. Copy for product descriptions and pages is HTML-escaped and wrapped in `<p>` tags. Text metafields reject HTML tags. JSON-LD must parse as a JSON object or array and must not contain `</script` or `<!--`. Target ids must be real Shopify Product or Page gids.
+
+**WebSockets.** `/api/interview/ws/*` and `/api/simulate/ws/*` reject any browser `Origin` that is not on the CORS allow-list (close code 4403), even with auth off. Tokens can still be passed as `?token=`, which may show up in proxy access logs; the `bearer, <token>` subprotocol avoids that.
+
+**Missing configuration.** Routes that need Neo4j return 503 with the variable names to set, and `/health` reports `"not_configured"`. Fix generation without `GEMINI_API_KEY` returns 503. Shopify calls without an Admin token return 503.
+
+**Known advisories with no runtime fix (accepted):**
+
+| Package | Severity | Where | Why it is accepted |
+|---|---|---|---|
+| `minimatch` < 11.0.1 (via `eslint`, `eslint-config-next`, `eslint-plugin-import`, `eslint-plugin-react`, `eslint-plugin-jsx-a11y`, `typescript-eslint`) | moderate | frontend dev tooling only | Only runs at lint time on our own files, never in the built app. A fix needs ESLint 10 plus plugin releases that drop minimatch 3, and `eslint-config-next` does not support ESLint 10 yet (Dependabot PR #74 failed CI on peer dependencies). Revisit when it does. |
+
+`@grpc/grpc-js` is pinned to `^1.14.7` through npm `overrides` because `firebase` still depends on a vulnerable `~1.9`. Drop the override once Firebase updates its own range.

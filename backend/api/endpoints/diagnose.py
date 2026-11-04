@@ -24,6 +24,7 @@ from core.diagnose.judge import classify_candidate
 from core.diagnose.ranker import GapRankingInputs, rank_gaps, split_for_ui
 from graph.neo4j_client import neo4j_client
 from graph.operations import deterministic_id, upsert_typed
+from utils.logging_safety import safe_log
 
 logger = logging.getLogger("echomind.api.diagnose")
 router = APIRouter(prefix="/diagnose", tags=["diagnose"])
@@ -199,7 +200,7 @@ async def get_gap(
     reasoning-trace animation from this response. All reads are scoped to the
     authenticated owner when auth is on.
     """
-    logger.debug("gap.detail diagnose_id=%s gap_id=%s", diagnose_id, gap_id)
+    logger.debug("gap.detail diagnose_id=%s gap_id=%s", safe_log(diagnose_id), safe_log(gap_id))
     # 1. Fetch the Gap node (scoped: a cross-tenant gap_id reads as not_found)
     gap_rows = await neo4j_client.run(
         f"MATCH (g:Gap {{id: $id}}) WHERE {scope.predicate('g')} RETURN g LIMIT 1",

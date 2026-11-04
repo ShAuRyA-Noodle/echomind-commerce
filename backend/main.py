@@ -24,9 +24,11 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import APIRouter, FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from neo4j.exceptions import AuthError as Neo4jAuthError
+from neo4j.exceptions import ServiceUnavailable as Neo4jUnavailable
 
 from api.auth_deps import verify_ws_token
 from api.auth_middleware import FirebaseAuthMiddleware, SecurityHeadersMiddleware
@@ -47,12 +49,14 @@ from config.prompts import AGENT_SIMULATOR_SYSTEM_PROMPT
 from config.settings import settings
 from core.agents.prompt_gen import generate_buyer_prompts
 from core.agents.runner import BuyerPromptInput, run_swarm
+from core.fix.shopify_writer import FixValidationError
 from core.socratic.extractor import extract_chunk
 from core.socratic.question_gen import generate_question
-from graph.neo4j_client import neo4j_client
+from graph.neo4j_client import Neo4jNotConfiguredError, neo4j_client
 from graph.operations import graph_stats, upsert_typed
 from services.firebase_service import firebase_service
 from services.llm_service import llm_service
+from services.shopify_service import ShopifyError
 from utils.logging_safety import safe_log
 
 logging.basicConfig(
@@ -73,6 +77,8 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     try:
         await neo4j_client.connect()
         logger.info("startup.neo4j.ok")
+    except Neo4jNotConfiguredError as exc:
+        logger.warning("startup.neo4j.not_configured - %s Graph routes will return 503.", exc)
     except Exception:
         logger.exception("startup.neo4j.failed - backend will run degraded")
     try:
@@ -109,6 +115,40 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# ---------------------------------------------------------------------------
+# Clear errors for missing configuration instead of 500 + stack trace
+# ---------------------------------------------------------------------------
+
+
+def _error(status_code: int, detail: str) -> JSONResponse:
+    return JSONResponse(status_code=status_code, content={"detail": detail})
+
+
+@app.exception_handler(Neo4jNotConfiguredError)
+async def _neo4j_not_configured(_request: Request, exc: Neo4jNotConfiguredError) -> JSONResponse:
+    return _error(503, str(exc))
+
+
+@app.exception_handler(Neo4jUnavailable)
+@app.exception_handler(Neo4jAuthError)
+async def _neo4j_unreachable(_request: Request, exc: Exception) -> JSONResponse:
+    logger.warning("neo4j.unreachable type=%s", type(exc).__name__)
+    return _error(503, "Neo4j is unreachable or rejected the credentials. Check NEO4J_URI, NEO4J_USERNAME and NEO4J_PASSWORD.")
+
+
+@app.exception_handler(FixValidationError)
+async def _fix_invalid(_request: Request, exc: FixValidationError) -> JSONResponse:
+    return _error(422, f"Fix not applied: {exc}")
+
+
+@app.exception_handler(ShopifyError)
+async def _shopify_failed(_request: Request, exc: ShopifyError) -> JSONResponse:
+    if "not configured" in str(exc):
+        return _error(503, f"Shopify is not configured: {exc}")
+    logger.warning("shopify.request_failed")
+    return _error(502, "Shopify request failed. See backend logs for details.")
+
 
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(FirebaseAuthMiddleware)
@@ -380,6 +420,13 @@ async def interview_ws(websocket: WebSocket, session_id: str) -> None:
 
     except WebSocketDisconnect:
         logger.info("interview.ws.disconnected session_id=%s", safe_log(session_id))
+    except Neo4jNotConfiguredError as exc:
+        logger.warning("interview.ws.neo4j_not_configured session_id=%s", safe_log(session_id))
+        try:
+            await websocket.send_json({"type": "error", "message": str(exc)})
+            await websocket.close(code=1011)
+        except Exception:
+            logger.debug("interview.ws.close_failed", exc_info=True)
     except Exception:
         logger.exception("interview.ws.error session_id=%s", safe_log(session_id))
         try:
@@ -483,6 +530,13 @@ async def simulate_ws(websocket: WebSocket, run_id: str) -> None:
 
     except WebSocketDisconnect:
         logger.info("simulate.ws.disconnected run_id=%s", safe_log(run_id))
+    except Neo4jNotConfiguredError as exc:
+        logger.warning("simulate.ws.neo4j_not_configured run_id=%s", safe_log(run_id))
+        try:
+            await websocket.send_json({"type": "error", "message": str(exc)})
+            await websocket.close(code=1011)
+        except Exception:
+            logger.debug("simulate.ws.close_failed", exc_info=True)
     except Exception:
         logger.exception("simulate.ws.error run_id=%s", safe_log(run_id))
         try:
