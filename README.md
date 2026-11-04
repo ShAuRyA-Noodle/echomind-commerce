@@ -188,7 +188,7 @@ All endpoints live under `/api`. WebSockets carry live state; REST handles one-s
 
 OpenAPI is auto-generated; once the backend is running, browse the live spec at `http://localhost:8000/docs`.
 
-> **Auth & multi-tenant scoping.** The public demo runs with `AUTH_REQUIRED=false`, so these routes are open and the `{store_id}` segment is informational. The graph/audit/diagnose/fix reads and `/fix/apply` carry a server-side owner-scoping layer (`backend/api/ownership.py`) that activates automatically when a Firebase token is present: reads bind the owner's `uid` into Cypher, writes stamp `owner_uid`, and `/fix/apply` rejects cross-tenant mutations. **For a shared multi-tenant deployment, set `AUTH_REQUIRED=true` and gate the frontend behind sign-in** (the REST client already attaches the ID token when Firebase is configured). See [SECURITY.md §2.1](SECURITY.md#21-production-multi-tenant-checklist-required-before-a-shared-deployment) for the full production checklist.
+> **Auth & multi-tenant scoping.** The public demo runs with `AUTH_REQUIRED=false`, so these routes are open and the `{store_id}` segment is informational. `/fix/apply` refuses to write to Shopify while auth is off unless `ENV` is `local`, and every fix text is validated and HTML-escaped before it reaches the store. The graph/audit/diagnose/fix reads and `/fix/apply` carry a server-side owner-scoping layer (`backend/api/ownership.py`) that activates automatically when a Firebase token is present: reads bind the owner's `uid` into Cypher, writes stamp `owner_uid`, and `/fix/apply` rejects cross-tenant mutations. **For a shared multi-tenant deployment, set `AUTH_REQUIRED=true` and gate the frontend behind sign-in** (the REST client already attaches the ID token when Firebase is configured). See [SECURITY.md §2.1](SECURITY.md#21-production-multi-tenant-checklist-required-before-a-shared-deployment) for the full production checklist.
 
 ## Configuration
 
@@ -216,6 +216,8 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+The backend starts even with no keys set. `/health` then reports `degraded` with `neo4j.status = "not_configured"`, and any route that needs a missing service answers with HTTP 503 and the variable to set (for example `NEO4J_URI` or `GEMINI_API_KEY`) instead of a stack trace.
 
 ### Frontend
 
@@ -250,6 +252,7 @@ make help           full target list
 
 ```bash
 cd backend
+pip install pytest pytest-asyncio   # test tools are not in requirements.txt
 pytest -q
 ```
 
@@ -307,8 +310,8 @@ echomind-commerce/
 
 | Layer | Choices |
 |---|---|
-| Backend | Python 3.11, FastAPI 0.115, uvicorn, websockets 13, pydantic 2.9, pydantic-settings, tenacity, httpx, neo4j 5.25, google-generativeai, google-cloud-speech, openai (for OpenRouter), firebase-admin |
-| Frontend | Next.js 14.2, React 18.3, TypeScript 5.5 (strict), Tailwind 3.4, shadcn/ui, react-force-graph-2d, @tanstack/react-query, recharts, firebase, zod |
+| Backend | Python 3.11, FastAPI, uvicorn, websockets, pydantic 2, pydantic-settings, tenacity, httpx, neo4j 5.25, google-generativeai, google-cloud-speech, openai (for OpenRouter), firebase-admin |
+| Frontend | Next.js 16, React 19, TypeScript 5.5 (strict), Tailwind 4, shadcn/ui, react-force-graph-2d, @tanstack/react-query, recharts, firebase, zod |
 | Data | Neo4j AuraDB (typed property graph + 768-dim cosine vector index), Firestore (sessions, transcripts, change log), Cloud Storage (audio, exports) |
 | LLMs | Gemini 2.5 Flash + Pro direct (extraction, judge, twin), text-embedding-004 (entity resolution), OpenRouter free-tier swarm (GPT-OSS 120B, Llama 3.3 70B, Qwen3 80B MoE, GLM-4.5 Air) |
 | Speech | Browser Web Speech API by default; Google STT V2 streaming wired as an optional server-side path |

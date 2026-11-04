@@ -23,6 +23,10 @@ from config.settings import settings
 logger = logging.getLogger("echomind.neo4j")
 
 
+class Neo4jNotConfiguredError(RuntimeError):
+    """Raised when NEO4J_URI is empty. main.py maps it to a clear HTTP 503."""
+
+
 class Neo4jClient:
     """Async-first wrapper around the Neo4j Python driver."""
 
@@ -48,7 +52,10 @@ class Neo4jClient:
         if self._driver is not None:
             return self._driver
         if not self.uri:
-            raise RuntimeError("Neo4j URI is not configured (NEO4J_URI is empty).")
+            raise Neo4jNotConfiguredError(
+                "Neo4j is not configured: set NEO4J_URI, NEO4J_USERNAME and "
+                "NEO4J_PASSWORD (see .env.example)."
+            )
 
         logger.info("neo4j.connect uri=%s db=%s", self.uri, self.database)
         self._driver = AsyncGraphDatabase.driver(
@@ -101,6 +108,8 @@ class Neo4jClient:
                     "server": version,
                     "database": self.database,
                 }
+        except Neo4jNotConfiguredError:
+            return {"status": "not_configured", "detail": "NEO4J_URI is empty"}
         except Exception:
             logger.exception("neo4j.ping.failed")
             return {"status": "error"}
